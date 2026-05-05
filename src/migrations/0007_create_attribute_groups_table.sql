@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS attribute_groups (
+    id BIGSERIAL PRIMARY KEY,
+    attribute_id BIGINT NOT NULL REFERENCES attributes(id) ON DELETE CASCADE,
+    slug TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT,
+    image TEXT,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

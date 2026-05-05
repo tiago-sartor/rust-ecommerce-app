@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
+
+@import "tailwindcss" source(none);
+
+@source "../mvc/views/frontend/";
+
+@theme {
+  --font-sans: "DM Sans", sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+
+  --color-gold-100: hsl(40, 35%, 95%);
+  --color-gold-200: hsl(40, 35%, 90%);
+  --color-gold-300: hsl(40, 35%, 85%);
+  --color-gold-400: hsl(40, 35%, 80%);
+  --color-gold-500: hsl(40, 35%, 70%);
+  --color-gold-600: hsl(40, 35%, 60%);
+  --color-gold-700: hsl(40, 35%, 50%);
+  --color-gold-800: hsl(40, 35%, 40%);
+  --color-gold-900: hsl(40, 35%, 32.5%);
+
+  /* Create a new custom breakpoint of 90rem (1440px) */
+  --breakpoint-1440px: 90rem;
+  --container-1440px: 90rem;
+}
+
+@layer base {
+
+  html {
+    @apply text-base text-gray-800;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    @apply cursor-pointer transition ease-in-out duration-300;
+  }
+
+  input[type=number],
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    @apply appearance-none m-0 p-0;
+    -moz-appearance: textfield;
+  }
+
+  .hide-scrollbar {
+    /* Edge */
+    -ms-overflow-style: none;
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+      @apply !hidden;
+    }
+  }
+
+  /**
+  * ALPINE JS
+  * This is used to hide elements until Alpine.js is ready.
+  */
+  [x-cloak] {
+    @apply !hidden;
+  }
+}

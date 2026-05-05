@@ -1,0 +1,32 @@
+{
+  "name": "ecommerce-wp-theme",
+  "version": "1.0.0",
+  "author": "",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "alpinejs": "^3.15.12",
+    "@alpinejs/collapse": "^3.15.12",
+    "@alpinejs/intersect": "^3.15.12",
+    "@alpinejs/persist": "^3.15.12",
+    "@alpinejs/resize": "^3.15.12",
+    "@alpinejs/sort": "^3.15.12",
+    "@alpinejs/mask": "^3.15.12"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.2.4",
+    "@tailwindcss/cli": "^4.2.4",
+    "webpack": "^5.106.2",
+    "webpack-cli": "^7.0.2"
+  },
+  "scripts": {
+    "webpack-dev": "webpack --mode development --watch",
+    "webpack-build": "webpack --mode production",
+    "tailwind-watch-frontend": "tailwindcss -i ./src/input.css -o ./public/css/style.css --watch",
+    "tailwind-watch-admin": "tailwindcss -i ./src/input-admin.css -o ./public/css/admin-style.css --watch",
+    "upgrade-dependencies": "npx npm-check-updates -u && npm install"
+  }
+}

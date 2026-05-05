@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@import "tailwindcss" source(none);
+
+@source "../mvc/views/admin/";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+
+  --color-gold-100: hsl(40, 35%, 95%);
+  --color-gold-200: hsl(40, 35%, 90%);
+  --color-gold-300: hsl(40, 35%, 85%);
+  --color-gold-400: hsl(40, 35%, 80%);
+  --color-gold-500: hsl(40, 35%, 70%);
+  --color-gold-600: hsl(40, 35%, 60%);
+  --color-gold-700: hsl(40, 35%, 50%);
+  --color-gold-800: hsl(40, 35%, 40%);
+  --color-gold-900: hsl(40, 35%, 32.5%);
+
+  /* Create a new custom breakpoint of 90rem (1440px) */
+  --breakpoint-1440px: 90rem;
+  --container-1440px: 90rem;
+}
+
+@layer base {
+
+  html,
+  body {
+    @apply text-base font-normal text-gray-800 bg-gray-50;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    @apply cursor-pointer transition ease-in-out duration-300;
+  }
+
+  input[type=number],
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    @apply appearance-none m-0 p-0;
+    -moz-appearance: textfield;
+  }
+
+  .hide-scrollbar {
+    /* Edge */
+    -ms-overflow-style: none;
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+      @apply !hidden;
+    }
+  }
+
+  /**
+  * ALPINE JS
+  * This is used to hide elements until Alpine.js is ready.
+  */
+  [x-cloak] {
+    @apply !hidden;
+  }
+
+
+
+  .menu-item {
+    @apply relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium;
+  }
+
+  .menu-item-active {
+    @apply text-indigo-500 bg-indigo-50;
+  }
+
+  .menu-item-inactive {
+    @apply text-gray-700 hover:bg-gray-100;
+  }
+
+
+
+  .menu-item-icon-active {
+    @apply text-indigo-500;
+  }
+
+  .menu-item-icon-inactive {
+    @apply text-gray-500 group-hover:text-gray-700;
+  }
+
+
+
+  .menu-item-arrow {
+    @apply absolute top-1/2 right-2.5 -translate-y-1/2 transition-transform ease-in-out duration-200;
+  }
+
+  .menu-item-arrow-active {
+    @apply -rotate-180 stroke-indigo-500;
+  }
+
+  .menu-item-arrow-inactive {
+    @apply stroke-gray-500 group-hover:text-gray-700;
+  }
+
+
+  .menu-dropdown {
+    @apply [interpolate-size:allow-keywords] overflow-hidden transition-all transition-discrete ease-in-out duration-300;
+  }
+
+  .menu-dropdown-item {
+    @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium;
+  }
+
+  .menu-dropdown-item-active {
+    @apply text-indigo-500 bg-indigo-50;
+  }
+
+  .menu-dropdown-item-inactive {
+    @apply text-gray-700 hover:bg-gray-100;
+  }
+}
