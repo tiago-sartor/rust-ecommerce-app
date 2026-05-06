@@ -2,7 +2,7 @@
 
 @import "tailwindcss" source(none);
 
-@source "../mvc/views/admin/";
+@source "../src/backend/";
 
 @theme {
   --font-sans: "Inter", sans-serif;

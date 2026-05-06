@@ -1,5 +1,5 @@
 use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::{rsx, Renderable};
 
 mod hypertext_elements {
     pub use hypertext::validation::hypertext_elements::*;
@@ -9,8 +9,10 @@ mod hypertext_elements {
     }
 }
 
-pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
-    let full_title = format!("{} | Admin Dashboard", title);
+use crate::models::admin::Admin;
+
+pub fn admin_layout(title: &str, content: impl Renderable, csrf_token: &str, admin: &Admin) -> impl Renderable {
+    let full_title = format!("{title} | Admin Dashboard");
 
     rsx! {
         <!DOCTYPE html>
@@ -19,29 +21,24 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            // CSRF
+            <meta name="csrf-token" content=(csrf_token)>
             // Title
             <title>(full_title)</title>
             // Favicon
-            <link href="/favicon.ico" rel="icon" type="image/x-icon">
+            <link href="/public/favicon.webp" rel="icon" type="image/webp">
             // CSS
-            <link href="/public/style.css" rel="stylesheet" type="text/css">
-            // Google Fonts (Inter)
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-            <style>
-                "body { font-family: 'Inter', sans-serif; }"
-            </style>
+            <link href="/public/css/admin.css" rel="stylesheet" type="text/css">
             // AlpineJS
-            <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+            <script defer src="/public/js/app.js"></script>
         </head>
 
-        <body "x-data"="{ page: 'dashboard', 'loading': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }">
+        <body x-data="{ page: 'dashboard', 'loading': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }">
 
             // ===== Preloader Start =====
             <div
-                "x-show"="loading"
-                "x-init"="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loading = false, 500)})"
+                x-show="loading"
+                x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loading = false, 500)})"
                 class="fixed left-0 top-0 z-999999 flex h-screen w-screen items-center justify-center bg-white">
                 <div class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-indigo-500 border-t-transparent"></div>
             </div>
@@ -51,33 +48,33 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
             <div class="flex h-screen overflow-hidden">
                 // ===== Sidebar Start =====
                 <aside
-                    "x-bind:class"="sidebarToggle ? 'translate-x-0 xl:w-[90px]' : '-translate-x-full'"
+                    x-bind:class="sidebarToggle ? 'translate-x-0 xl:w-[90px]' : '-translate-x-full'"
                     class="fixed top-0 left-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white p-4 transition-all duration-300 xl:static xl:translate-x-0">
                     // SIDEBAR HEADER
-                    <div "x-bind:class"="sidebarToggle ? 'justify-center' : 'justify-between'"
+                    <div x-bind:class="sidebarToggle ? 'justify-center' : 'justify-between'"
                         class="sidebar-header flex items-center gap-2 pt-4 pb-6">
                         <a href="index.html">
-                            <img "x-bind:class"="sidebarToggle ? 'hidden' : ''" class="logo" src="src/images/logo/logo.svg" alt="Logo" />
-                            <img "x-bind:class"="sidebarToggle ? 'xl:block' : 'hidden'" class="logo-icon" src="src/images/logo/logo-icon.svg" alt="Logo" />
+                            <img x-bind:class="sidebarToggle ? 'hidden' : ''" class="logo" src="src/images/logo/logo.svg" alt="Logo" />
+                            <img x-bind:class="sidebarToggle ? 'xl:block' : 'hidden'" class="logo-icon" src="src/images/logo/logo-icon.svg" alt="Logo" />
                         </a>
                     </div>
                     // SIDEBAR HEADER
 
                     // Sidebar Menu
-                    <nav "x-data"="{selected: $persist('Dashboard')}" class="flex flex-col flex-1 gap-6 overflow-y-auto duration-300 ease-linear hide-scrollbar">
+                    <nav x-data="{selected: $persist('Dashboard')}" class="flex flex-col flex-1 gap-6 overflow-y-auto duration-300 ease-linear hide-scrollbar">
                         // Menu Group
                         <div class="menu-group flex-1">
                             <ul class="flex flex-col gap-3">
                                 // Menu Item Dashboard
                                 <li>
-                                    <a href="/admin/dashboard" "@click"="selected = (selected === 'Dashboard' ? '' : 'Dashboard')"
+                                    <a href="/admin/dashboard" x-on:click="selected = (selected === 'Dashboard' ? '' : 'Dashboard')"
                                         class="menu-item group"
-                                        "x-bind:class"="(selected === 'Dashboard') && (page === 'dashboard') ? 'menu-item-active' : 'menu-item-inactive'">
-                                        <svg class="size-6" "x-bind:class"="(selected === 'Dashboard') && (page === 'dashboard') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
+                                        x-bind:class="(selected === 'Dashboard') && (page === 'dashboard') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        <svg class="size-6" x-bind:class="(selected === 'Dashboard') && (page === 'dashboard') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round"
                                                 "d"="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "Dashboard"
                                         </span>
                                     </a>
@@ -87,19 +84,19 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                 // Menu Item Orders
                                 <li>
                                     <a
-                                        href="#" "@click.prevent"="selected = (selected === 'Orders' ? '':'Orders')"
+                                        href="#" x-on:click.prevent="selected = (selected === 'Orders' ? '':'Orders')"
                                         class="menu-item group"
-                                        "x-bind:class"="(selected === 'Orders') || (page === 'list-orders' || page === 'create-order') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        x-bind:class="(selected === 'Orders') || (page === 'list-orders' || page === 'create-order') ? 'menu-item-active' : 'menu-item-inactive'">
                                         <svg
                                             class="size-6"
-                                            "x-bind:class"="(selected === 'Orders') || (page === 'list-orders' || page === 'create-order') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                            x-bind:class="(selected === 'Orders') || (page === 'list-orders' || page === 'create-order') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
                                             "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.5" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "Orders"
                                         </span>
-                                        <svg class="menu-item-arrow size-4" "x-bind:class"="[(selected === 'Orders') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
+                                        <svg class="menu-item-arrow size-4" x-bind:class="[(selected === 'Orders') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="m19.5 8.25-7.5 7.5-7.5-7.5"></path>
                                         </svg>
                                     </a>
@@ -107,21 +104,21 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                     // Dropdown Menu Start
                                     <div
                                         class="menu-dropdown"
-                                        "x-bind:class"="(selected === 'Orders') ? 'h-fit opacity-100' :'h-0 opacity-0'">
+                                        x-bind:class="(selected === 'Orders') ? 'h-fit opacity-100' :'h-0 opacity-0'">
                                         <ul
                                             class="flex flex-col gap-1 mt-2 pl-9"
-                                            "x-bind:class"="sidebarToggle ? 'lg:hidden' : 'flex'">
+                                            x-bind:class="sidebarToggle ? 'lg:hidden' : 'flex'">
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'list-orders') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'list-orders') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "View orders"
                                                 </a>
                                             </li>
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'create-order') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'create-order') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "Add new order"
                                                 </a>
                                             </li>
@@ -135,19 +132,19 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                 <li>
                                     <a
                                         href="#"
-                                        "@click"="selected = (selected === 'Customers' ? '' : 'Customers')"
+                                        x-on:click="selected = (selected === 'Customers' ? '' : 'Customers')"
                                         class="menu-item group"
-                                        "x-bind:class"="(selected === 'Customers') || (page === 'list-customers' || page === 'create-customer') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        x-bind:class="(selected === 'Customers') || (page === 'list-customers' || page === 'create-customer') ? 'menu-item-active' : 'menu-item-inactive'">
                                         <svg
                                             class="size-6"
-                                            "x-bind:class"="(selected === 'Customers') || (page === 'list-customers' || page === 'create-customer') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                            x-bind:class="(selected === 'Customers') || (page === 'list-customers' || page === 'create-customer') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
                                             "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "Customers"
                                         </span>
-                                        <svg class="menu-item-arrow size-4" "x-bind:class"="(selected === 'Customers') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' " "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
+                                        <svg class="menu-item-arrow size-4" x-bind:class="(selected === 'Customers') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' " "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="m19.5 8.25-7.5 7.5-7.5-7.5"></path>
                                         </svg>
                                     </a>
@@ -155,21 +152,21 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                     // Dropdown Menu Start
                                     <div
                                         class="menu-dropdown"
-                                        "x-bind:class"="(selected === 'Customers') ? 'h-fit opacity-100' :'h-0 opacity-0'">
+                                        x-bind:class="(selected === 'Customers') ? 'h-fit opacity-100' :'h-0 opacity-0'">
                                         <ul
                                             class="flex flex-col gap-1 mt-2 pl-9"
-                                            "x-bind:class"="sidebarToggle ? 'lg:hidden' : 'flex'">
+                                            x-bind:class="sidebarToggle ? 'lg:hidden' : 'flex'">
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'list-customers') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'list-customers') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "View customers"
                                                 </a>
                                             </li>
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'create-customer') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'create-customer') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "Add new customer"
                                                 </a>
                                             </li>
@@ -183,19 +180,19 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                 <li>
                                     <a
                                         href="#"
-                                        "@click"="selected = (selected === 'Products' ? '' : 'Products')"
+                                        x-on:click="selected = (selected === 'Products' ? '' : 'Products')"
                                         class="menu-item group"
-                                        "x-bind:class"="(selected === 'Products') || (page === 'list-products' || page === 'create-product') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        x-bind:class="(selected === 'Products') || (page === 'list-products' || page === 'create-product') ? 'menu-item-active' : 'menu-item-inactive'">
                                         <svg
                                             class="size-6"
-                                            "x-bind:class"="(selected === 'Products') || (page === 'list-products' || page === 'create-product') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                            x-bind:class="(selected === 'Products') || (page === 'list-products' || page === 'create-product') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
                                             "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "Products"
                                         </span>
-                                        <svg class="menu-item-arrow size-4" "x-bind:class"="(selected === 'Products') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' " "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
+                                        <svg class="menu-item-arrow size-4" x-bind:class="(selected === 'Products') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' " "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="m19.5 8.25-7.5 7.5-7.5-7.5"></path>
                                         </svg>
                                     </a>
@@ -203,33 +200,33 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                     // Dropdown Menu Start
                                     <div
                                         class="menu-dropdown"
-                                        "x-bind:class"="(selected === 'Products') ? 'h-fit opacity-100' :'h-0 opacity-0'">
+                                        x-bind:class="(selected === 'Products') ? 'h-fit opacity-100' :'h-0 opacity-0'">
                                         <ul
                                             class="flex flex-col gap-1 mt-2 pl-9"
-                                            "x-bind:class"="sidebarToggle ? 'lg:hidden' : 'flex'">
+                                            x-bind:class="sidebarToggle ? 'lg:hidden' : 'flex'">
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'list-products') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'list-products') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "View products"
                                                 </a>
                                             </li>
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'create-product') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'create-product') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "Add new product"
                                                 </a>
                                             </li>
                                             <li>
                                                 <a href="#" class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'list-categories') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'list-categories') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "Categories"
                                                 </a>
                                             </li>
                                             <li>
                                                 <a href="#" class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'list-attributes') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'list-attributes') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "Attributes"
                                                 </a>
                                             </li>
@@ -243,19 +240,19 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                 <li>
                                     <a
                                         href="#"
-                                        "@click"="selected = (selected === 'Marketing' ? '' : 'Marketing')"
+                                        x-on:click="selected = (selected === 'Marketing' ? '' : 'Marketing')"
                                         class="menu-item group"
-                                        "x-bind:class"="(selected === 'Marketing') || (page === 'list-marketing' || page === 'create-marketing') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        x-bind:class="(selected === 'Marketing') || (page === 'list-marketing' || page === 'create-marketing') ? 'menu-item-active' : 'menu-item-inactive'">
                                         <svg
                                             class="size-6"
-                                            "x-bind:class"="(selected === 'Marketing') || (page === 'list-marketing' || page === 'create-marketing') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                            x-bind:class="(selected === 'Marketing') || (page === 'list-marketing' || page === 'create-marketing') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
                                             "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
-                                            <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1-1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"></path>
+                                            <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "Marketing"
                                         </span>
-                                        <svg class="menu-item-arrow size-4" "x-bind:class"="(selected === 'Marketing') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' " "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
+                                        <svg class="menu-item-arrow size-4" x-bind:class="(selected === 'Marketing') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' " "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="2" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="m19.5 8.25-7.5 7.5-7.5-7.5"></path>
                                         </svg>
                                     </a>
@@ -263,21 +260,21 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                     // Dropdown Menu Start
                                     <div
                                         class="menu-dropdown"
-                                        "x-bind:class"="(selected === 'Marketing') ? 'h-fit opacity-100' :'h-0 opacity-0'">
+                                        x-bind:class="(selected === 'Marketing') ? 'h-fit opacity-100' :'h-0 opacity-0'">
                                         <ul
                                             class="flex flex-col gap-1 mt-2 pl-9"
-                                            "x-bind:class"="sidebarToggle ? 'lg:hidden' : 'flex'">
+                                            x-bind:class="sidebarToggle ? 'lg:hidden' : 'flex'">
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'list-campaigns') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'list-campaigns') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "View campaigns"
                                                 </a>
                                             </li>
                                             <li>
                                                 <a href="#"
                                                     class="menu-dropdown-item group"
-                                                    "x-bind:class"="(page === 'create-campaign') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'create-campaign') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "Add new campaign"
                                                 </a>
                                             </li>
@@ -289,13 +286,13 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
 
                                 // Menu Item Analytics
                                 <li>
-                                    <a href="#" "@click"="selected = (selected === 'Analytics' ? '' : 'Analytics')"
+                                    <a href="#" x-on:click="selected = (selected === 'Analytics' ? '' : 'Analytics')"
                                         class="menu-item group"
-                                        "x-bind:class"=" (selected === 'Analytics') && (page === 'analytics') ? 'menu-item-active' : 'menu-item-inactive'">
-                                        <svg class="size-6" "x-bind:class"="(selected === 'Analytics') && (page === 'analytics') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
+                                        x-bind:class=" (selected === 'Analytics') && (page === 'analytics') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        <svg class="size-6" x-bind:class="(selected === 'Analytics') && (page === 'analytics') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "Analytics"
                                         </span>
                                     </a>
@@ -304,13 +301,13 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
 
                                 // Menu Item Emails
                                 <li>
-                                    <a href="#" "@click"="selected = (selected === 'Emails' ? '' : 'Emails')"
+                                    <a href="#" x-on:click="selected = (selected === 'Emails' ? '' : 'Emails')"
                                         class="menu-item group"
-                                        "x-bind:class"=" (selected === 'Emails') && (page === 'emails') ? 'menu-item-active' : 'menu-item-inactive'">
-                                        <svg class="size-6" "x-bind:class"="(selected === 'Emails') && (page === 'emails') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
+                                        x-bind:class=" (selected === 'Emails') && (page === 'emails') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        <svg class="size-6" x-bind:class="(selected === 'Emails') && (page === 'emails') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "E-mails"
                                         </span>
                                     </a>
@@ -322,14 +319,14 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                             <ul class="flex flex-col gap-3">
                                 // Menu Item Settings
                                 <li>
-                                    <a href="#" "@click"="selected = (selected === 'Settings' ? '' : 'Settings')"
+                                    <a href="#" x-on:click="selected = (selected === 'Settings' ? '' : 'Settings')"
                                         class="menu-item group"
-                                        "x-bind:class"=" (selected === 'Settings') && (page === 'settings') ? 'menu-item-active' : 'menu-item-inactive'">
-                                        <svg class="size-6" "x-bind:class"="(selected === 'Settings') && (page === 'settings') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
+                                        x-bind:class=" (selected === 'Settings') && (page === 'settings') ? 'menu-item-active' : 'menu-item-inactive'">
+                                        <svg class="size-6" x-bind:class="(selected === 'Settings') && (page === 'settings') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z"></path>
                                             <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
                                         </svg>
-                                        <span class="menu-item-text" "x-bind:class"="sidebarToggle ? 'lg:hidden' : ''">
+                                        <span class="menu-item-text" x-bind:class="sidebarToggle ? 'lg:hidden' : ''">
                                             "Settings"
                                         </span>
                                     </a>
@@ -348,14 +345,14 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                     class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto">
                     // Small Device Overlay Start
                     <div
-                        "@click"="sidebarToggle = false"
-                        "x-bind:class"="sidebarToggle ? 'block lg:hidden' : 'hidden'"
+                        x-on:click="sidebarToggle = false"
+                        x-bind:class="sidebarToggle ? 'block lg:hidden' : 'hidden'"
                         class="fixed w-full h-screen z-9 bg-gray-900/50"></div>
                     // Small Device Overlay End
 
                     // ===== Header Start =====
                     <header
-                        "x-data"="{menuToggle: false}"
+                        x-data="{menuToggle: false}"
                         class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white lg:border-b  ">
                         <div
                             class="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
@@ -363,9 +360,9 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                 class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 ">
                                 // Hamburger Toggle BTN
                                 <button
-                                    "x-bind:class"="sidebarToggle ? 'lg:bg-transparent  bg-gray-100 ' : ''"
+                                    x-bind:class="sidebarToggle ? 'lg:bg-transparent  bg-gray-100 ' : ''"
                                     class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:h-11 lg:w-11 lg:border  "
-                                    "@click.stop"="sidebarToggle = !sidebarToggle">
+                                    x-on:click.stop="sidebarToggle = !sidebarToggle">
                                     <svg
                                         class="hidden fill-current lg:block"
                                         "width"="16"
@@ -380,7 +377,7 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                     </svg>
 
                                     <svg
-                                        "x-bind:class"="sidebarToggle ? 'hidden' : 'block lg:hidden'"
+                                        x-bind:class="sidebarToggle ? 'hidden' : 'block lg:hidden'"
                                         class="fill-current lg:hidden"
                                         "width"="24"
                                         "height"="24"
@@ -395,7 +392,7 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
 
                                     // cross icon
                                     <svg
-                                        "x-bind:class"="sidebarToggle ? 'block lg:hidden' : 'hidden'"
+                                        x-bind:class="sidebarToggle ? 'block lg:hidden' : 'hidden'"
                                         class="fill-current"
                                         "width"="24"
                                         "height"="24"
@@ -417,8 +414,8 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                 // Application nav menu button
                                 <button
                                     class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 lg:hidden  "
-                                    "x-bind:class"="menuToggle ? 'bg-gray-100 ' : ''"
-                                    "@click.stop"="menuToggle = !menuToggle">
+                                    x-bind:class="menuToggle ? 'bg-gray-100 ' : ''"
+                                    x-on:click.stop="menuToggle = !menuToggle">
                                     <svg
                                         class="fill-current"
                                         "width"="24"
@@ -462,19 +459,19 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                             </div>
 
                             <div
-                                "x-bind:class"="menuToggle ? 'flex' : 'hidden'"
+                                x-bind:class="menuToggle ? 'flex' : 'hidden'"
                                 class="shadow-md w-full items-center justify-between gap-4 px-5 py-4 lg:flex lg:justify-end lg:px-0 lg:shadow-none">
                                 <div class="2xsm:gap-3 flex items-center gap-2">
                                     // Notification Menu Area
                                     <div
                                         class="relative"
-                                        "x-data"="{ dropdownOpen: false, notifying: true }"
-                                        "@click.outside"="dropdownOpen = false">
+                                        x-data="{ dropdownOpen: false, notifying: true }"
+                                        x-on:click.outside="dropdownOpen = false">
                                         <button
                                             class="relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-                                            "@click.prevent"="dropdownOpen = ! dropdownOpen; notifying = false">
+                                            x-on:click.prevent="dropdownOpen = ! dropdownOpen; notifying = false">
                                             <span
-                                                "x-bind:class"="!notifying ? 'hidden' : 'flex'"
+                                                x-bind:class="!notifying ? 'hidden' : 'flex'"
                                                 class="absolute top-0.5 right-0 z-1 h-2 w-2 rounded-full bg-orange-400">
                                                 <span
                                                     class="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
@@ -495,7 +492,7 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
 
                                         // Dropdown Start
                                         <div
-                                            "x-show"="dropdownOpen"
+                                            x-show="dropdownOpen"
                                             class="shadow-lg  absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 sm:w-[361px] lg:right-0 ">
                                             <div
                                                 class="mb-3 flex items-center justify-between border-b border-gray-100 pb-3 ">
@@ -505,7 +502,7 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                                 </h5>
 
                                                 <button
-                                                    "@click"="dropdownOpen = false"
+                                                    x-on:click="dropdownOpen = false"
                                                     class="text-gray-500 ">
                                                     <svg
                                                         class="fill-current"
@@ -666,17 +663,17 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                 // User Area
                                 <div
                                     class="relative"
-                                    "x-data"="{ dropdownOpen: false, profileImage: '' }"
-                                    "@click.outside"="dropdownOpen = false">
+                                    x-data="{ dropdownOpen: false, profileImage: '' }"
+                                    x-on:click.outside="dropdownOpen = false">
                                     <a
                                         class="flex items-center text-gray-700 "
                                         href="#"
-                                        "@click.prevent"="dropdownOpen = ! dropdownOpen">
+                                        x-on:click.prevent="dropdownOpen = ! dropdownOpen">
                                         <span class="mr-3 h-11 w-11 border border-gray-200 rounded-full">
-                                            <template "x-if"="profileImage">
-                                                <img "x-bind:src"="profileImage" alt="admin profile image" class="object-cover size-full rounded-full" />
+                                            <template x-if="profileImage">
+                                                <img x-bind:src="profileImage" alt="admin profile image" class="object-cover size-full rounded-full" />
                                             </template>
-                                            <template "x-if"="!profileImage">
+                                            <template x-if="!profileImage">
                                                 <svg class="object-cover size-full rounded-full" "viewBox"="312.81 0 401 401">
                                                     <path "fill"="#e4e6e7" "d"="M268.073-44.735h490.423v490.423H268.073z"></path>
                                                     <path "fill"="#aeb4b7" "d"="M513.81 267.142c-103.361 0-187.754 58.93-192.475 132.842h384.988c-4.733-73.918-89.157-132.842-192.512-132.842m96.605-109.116c0 57.17-42.935 103.516-95.896 103.516s-95.895-46.346-95.895-103.516S461.559 54.51 514.52 54.51c52.968 0 95.896 46.352 95.896 103.515z"></path>
@@ -684,10 +681,10 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
                                             </template>
                                         </span>
 
-                                        <span class="text-sm mr-1 block font-medium">"Admin User"</span>
+                                        <span class="text-sm mr-1 block font-medium">(admin.first_name) " " (admin.last_name)</span>
 
                                         <svg
-                                            "x-bind:class"="dropdownOpen && 'rotate-180'"
+                                            x-bind:class="dropdownOpen && 'rotate-180'"
                                             class="stroke-gray-500 "
                                             "width"="18"
                                             "height"="20"
@@ -704,16 +701,16 @@ pub fn admin_layout(title: &str, content: impl Renderable) -> impl Renderable {
 
                                     // Dropdown Start
                                     <div
-                                        "x-show"="dropdownOpen"
+                                        x-show="dropdownOpen"
                                         class="shadow-lg absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 ">
                                         <div>
                                             <span
                                                 class="text-sm block font-medium text-gray-700 ">
-                                                "Admin User"
+                                                (admin.first_name) " " (admin.last_name)
                                             </span>
                                             <span
                                                 class="text-xs mt-0.5 block text-gray-500 ">
-                                                "admin@example.com"
+                                                (admin.email)
                                             </span>
                                         </div>
 

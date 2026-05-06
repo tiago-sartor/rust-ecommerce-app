@@ -3,9 +3,9 @@
 import path from 'path';
 
 export default {
-    entry: './src/index.js',
+    entry: './npm_src/index.js',
     output: {
         path: path.resolve('.', 'public', 'js'),
-        filename: 'bundle.js',
+        filename: 'app.js',
     },
 }

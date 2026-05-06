@@ -1,15 +1,43 @@
+use crate::models::customer::Customer;
 use axum::{
-    extract::{Path},
-    http::StatusCode,
-    response::Html,
     Json,
+    extract::{Form, Path, State},
+    http::StatusCode,
+    response::{Html, IntoResponse, Redirect},
 };
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
+use tower_sessions::Session;
+
+#[derive(Deserialize)]
+pub struct LoginPayload {
+    pub email: String,
+    pub password: String,
+}
+
+pub async fn customer_login_post(
+    State(pool): State<PgPool>,
+    session: Session,
+    Form(payload): Form<LoginPayload>,
+) -> impl IntoResponse {
+    match Customer::get_by_email(&pool, &payload.email).await {
+        Ok(Some(customer)) if customer.verify_password(&payload.password) => {
+            session.insert("customer_id", customer.id).await.unwrap();
+            Redirect::to("/").into_response()
+        }
+        _ => Redirect::to("/login").into_response(),
+    }
+}
+
+pub async fn customer_logout(session: Session) -> impl IntoResponse {
+    session.clear().await;
+    Redirect::to("/login")
+}
 
 // Mock data structures
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Product {
-    pub id: u32,
+    pub id: i64,
     pub slug: String,
     pub name: String,
     pub price: f64,
@@ -21,8 +49,8 @@ pub struct Product {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CartItem {
-    pub id: u32,
-    pub product_id: u32,
+    pub id: i64,
+    pub product_id: i64,
     pub name: String,
     pub price: f64,
     pub quantity: u32,
@@ -98,7 +126,7 @@ fn get_mock_products() -> Vec<Product> {
     ]
 }
 
-fn get_mock_product_by_id(id: u32) -> Option<Product> {
+fn get_mock_product_by_id(id: i64) -> Option<Product> {
     get_mock_products().into_iter().find(|p| p.id == id)
 }
 

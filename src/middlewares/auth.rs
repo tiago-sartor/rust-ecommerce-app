@@ -1,20 +1,35 @@
-use axum::{
-    body::Body,
-    http::{header, Request, StatusCode},
-    middleware::Next,
-    response::Response,
-};
+use axum::{extract::Request, http::StatusCode, middleware::Next, response::Response};
+use tower_sessions::Session;
 
-pub async fn admin_auth(req: Request<Body>, next: Next) -> Result<Response, StatusCode> {
-    let auth_header = req
-        .headers()
-        .get(header::AUTHORIZATION)
-        .and_then(|value| value.to_str().ok());
+pub async fn admin_auth(
+    session: Session,
+    request: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    let admin_id: Option<i64> = session
+        .get("admin_id")
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let authorized = matches!(auth_header, Some(value) if value == "Bearer admin-secret");
+    if admin_id.is_some() {
+        Ok(next.run(request).await)
+    } else {
+        Err(StatusCode::UNAUTHORIZED)
+    }
+}
 
-    if authorized {
-        Ok(next.run(req).await)
+pub async fn customer_auth(
+    session: Session,
+    request: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    let customer_id: Option<i64> = session
+        .get("customer_id")
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    if customer_id.is_some() {
+        Ok(next.run(request).await)
     } else {
         Err(StatusCode::UNAUTHORIZED)
     }

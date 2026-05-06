@@ -155,7 +155,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "Last Login"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (admin.last_login.as_deref().unwrap_or("Never"))
+                                        (admin.last_login.map(|d| format!("{}", d)).unwrap_or_else(|| "Never".to_string()))
                                     </p>
                                 </div>
                                 <div>
@@ -163,7 +163,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "Registered Since"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (admin.created_at)
+                                        (format!("{}", admin.created_at))
                                     </p>
                                 </div>
                             </div>

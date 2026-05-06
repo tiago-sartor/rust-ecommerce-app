@@ -4,6 +4,6 @@ CREATE TABLE IF NOT EXISTS attributes (
     name TEXT NOT NULL,
     description TEXT,
     image TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPZ DEFAULT now(),
+    updated_at TIMESTAMPZ DEFAULT now()
 );

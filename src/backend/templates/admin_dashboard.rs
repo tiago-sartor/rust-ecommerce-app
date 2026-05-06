@@ -1,6 +1,6 @@
 use crate::models::admin::Admin;
 use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::{rsx, Renderable};
 
 // Define missing elements for type-checking in rsx!
 mod hypertext_elements {
@@ -436,7 +436,7 @@ pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
                                                     </div>
                                                     <div>
                                                         <p class="font-medium text-gray-800 text-sm ">
-                                                            "Macbook pro 13"
+                                                            "Macbook pro 13\""
                                                         </p>
                                                         <span class="text-gray-500 text-xs ">
                                                             "2 Variants"

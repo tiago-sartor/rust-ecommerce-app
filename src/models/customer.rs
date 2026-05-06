@@ -1,7 +1,13 @@
-use super::address::Address;
+use argon2::{
+    Argon2,
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
+};
+use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Customer {
-    pub id: u32,
+    pub id: i64,
     pub first_name: String,
     pub last_name: String,
     pub email: String,
@@ -12,14 +18,67 @@ pub struct Customer {
     pub company_name: Option<String>,
     pub cnpj: Option<String>,
     pub state_registration: Option<String>,
-    pub address: Option<Address>,
     pub is_active: bool,
-    pub last_login: Option<String>,
-    pub created_at: String,
-    pub updated_at: String,
+    pub last_login: Option<OffsetDateTime>,
+    pub created_at: OffsetDateTime,
+    pub updated_at: OffsetDateTime,
 }
 
-pub async fn get_customer_by_id(customer_id: u32) -> Option<Customer> {
+impl Customer {
+    pub fn hash_password(password: &str) -> String {
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        argon2
+            .hash_password(password.as_bytes(), &salt)
+            .expect("Failed to hash password")
+            .to_string()
+    }
+
+    pub fn verify_password(&self, password: &str) -> bool {
+        let argon2 = Argon2::default();
+        match PasswordHash::new(&self.password_hash) {
+            Ok(parsed_hash) => argon2
+                .verify_password(password.as_bytes(), &parsed_hash)
+                .is_ok(),
+            Err(_) => false,
+        }
+    }
+
+    pub async fn get_by_email(
+        pool: &sqlx::PgPool,
+        email: &str,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as!(
+            Self,
+            r#"
+            SELECT id, first_name, last_name, email, password_hash, phone, profile_image_url, cpf, company_name, cnpj, state_registration, is_active as "is_active!", last_login as "last_login?: OffsetDateTime", created_at as "created_at!: OffsetDateTime", updated_at as "updated_at!: OffsetDateTime"
+            FROM customers
+            WHERE email = $1
+            "#,
+            email
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    pub async fn get_by_id(pool: &sqlx::PgPool, id: i64) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as!(
+            Self,
+            r#"
+            SELECT id, first_name, last_name, email, password_hash, phone, profile_image_url, cpf, company_name, cnpj, state_registration, is_active as "is_active!", last_login as "last_login?: OffsetDateTime", created_at as "created_at!: OffsetDateTime", updated_at as "updated_at!: OffsetDateTime"
+            FROM customers
+            WHERE id = $1
+            "#,
+            id
+        )
+        .fetch_optional(pool)
+        .await
+    }
+}
+
+pub async fn get_customer_by_id(customer_id: i64) -> Option<Customer> {
+    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+
     // Simulate fetching customer from a database
     Some(Customer {
         id: customer_id,
@@ -33,15 +92,16 @@ pub async fn get_customer_by_id(customer_id: u32) -> Option<Customer> {
         company_name: None,
         cnpj: None,
         state_registration: None,
-        address: None,
         is_active: true,
         last_login: None,
-        created_at: "".to_string(),
-        updated_at: "".to_string(),
+        created_at: now,
+        updated_at: now,
     })
 }
 
 pub async fn get_customer_by_email(email: &str) -> Option<Customer> {
+    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+
     // Simulate fetching customer from a database
     if email == "john.doe@example.com" {
         Some(Customer {
@@ -56,11 +116,10 @@ pub async fn get_customer_by_email(email: &str) -> Option<Customer> {
             company_name: None,
             cnpj: None,
             state_registration: None,
-            address: None,
             is_active: true,
             last_login: None,
-            created_at: "".to_string(),
-            updated_at: "".to_string(),
+            created_at: now,
+            updated_at: now,
         })
     } else {
         None
@@ -68,6 +127,8 @@ pub async fn get_customer_by_email(email: &str) -> Option<Customer> {
 }
 
 pub async fn get_customer_by_cpf(cpf: &str) -> Option<Customer> {
+    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+
     // Simulate fetching customer from a database
     if cpf == "123.456.789-00" {
         Some(Customer {
@@ -82,11 +143,10 @@ pub async fn get_customer_by_cpf(cpf: &str) -> Option<Customer> {
             company_name: None,
             cnpj: None,
             state_registration: None,
-            address: None,
             is_active: true,
             last_login: None,
-            created_at: "".to_string(),
-            updated_at: "".to_string(),
+            created_at: now,
+            updated_at: now,
         })
     } else {
         None
@@ -94,6 +154,8 @@ pub async fn get_customer_by_cpf(cpf: &str) -> Option<Customer> {
 }
 
 pub async fn get_customer_by_cnpj(cnpj: &str) -> Option<Customer> {
+    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+
     // Simulate fetching customer from a database
     if cnpj == "12.345.678/0001-00" {
         Some(Customer {
@@ -108,11 +170,10 @@ pub async fn get_customer_by_cnpj(cnpj: &str) -> Option<Customer> {
             company_name: Some("Awesome Company LLC".to_string()),
             cnpj: Some("12.345.678/0001-00".to_string()),
             state_registration: None,
-            address: None,
             is_active: true,
             last_login: None,
-            created_at: "".to_string(),
-            updated_at: "".to_string(),
+            created_at: now,
+            updated_at: now,
         })
     } else {
         None
@@ -124,7 +185,7 @@ pub async fn create_customer(customer: Customer) -> Customer {
     customer
 }
 
-pub async fn update_customer(customer_id: u32, updated_customer: Customer) -> Option<Customer> {
+pub async fn update_customer(customer_id: i64, updated_customer: Customer) -> Option<Customer> {
     // Simulate updating a customer in a database
     if customer_id == 1 {
         Some(updated_customer)
@@ -133,7 +194,7 @@ pub async fn update_customer(customer_id: u32, updated_customer: Customer) -> Op
     }
 }
 
-pub async fn delete_customer(customer_id: u32) -> bool {
+pub async fn delete_customer(customer_id: i64) -> bool {
     // Simulate deleting a customer from a database
     customer_id == 1
 }

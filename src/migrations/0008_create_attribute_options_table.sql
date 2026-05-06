@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS attribute_options (
     description TEXT,
     image TEXT,
     sort_order INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPZ DEFAULT now(),
+    updated_at TIMESTAMPZ DEFAULT now()
 );

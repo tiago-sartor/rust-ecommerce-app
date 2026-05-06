@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS addresses (
     city TEXT NOT NULL,
     state TEXT NOT NULL,
     postcode TEXT NOT NULL CHECK (LENGTH(postcode) = 8),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPZ DEFAULT now(),
+    updated_at TIMESTAMPZ DEFAULT now()
 );
