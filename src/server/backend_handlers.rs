@@ -1,12 +1,16 @@
+use std::collections::HashMap;
+
 use crate::backend::layouts::admin_layout::admin_layout;
 use crate::backend::templates::admin_account::admin_account as admin_account_template;
 use crate::backend::templates::admin_dashboard::admin_dashboard as admin_dashboard_template;
+use crate::backend::templates::admin_login::admin_login as admin_login_template;
 use crate::models::admin::Admin;
+
 use axum::{
     extract::{Form, State},
     response::{IntoResponse, Redirect},
 };
-use hypertext::Renderable;
+use hypertext::{Renderable, context};
 use serde::Deserialize;
 use sqlx::PgPool;
 use tower_sessions::Session;
@@ -17,17 +21,26 @@ pub struct LoginPayload {
     pub password: String,
 }
 
-pub async fn admin_login_get() -> impl IntoResponse {
-    // For now, return a placeholder or render the template if available
-    // admin_layout("Login", admin_login_template(), "").render()
-    "Login Page (GET) - Implementation in progress".into_response()
+pub enum Type {
+    Text(String),
+    List(Vec<String>),
+    Map(HashMap<String, String>),
 }
 
-pub async fn admin_login_post(
-    State(pool): State<PgPool>,
-    session: Session,
-    Form(payload): Form<LoginPayload>,
-) -> impl IntoResponse {
+pub async fn admin_login_get() -> impl IntoResponse {
+    let token = "asdasdasdasd".to_string();
+
+    let mut context: HashMap<String, Type> = HashMap::new();
+    context.insert("csrf_token".to_string(), Type::Text(token.clone()));
+    context.insert("email".to_string(), Type::Text("johndoe@gmail.com".to_string()));
+    context.insert("password".to_string(), Type::Text("abc123".to_string()));
+    context.insert("errors".to_string(), Type::Map(HashMap::new()));
+
+    let template = admin_login_template(&context);
+    admin_layout("Login", template, &token, None).render()
+}
+
+pub async fn admin_login_post(State(pool): State<PgPool>, session: Session, Form(payload): Form<LoginPayload>) -> impl IntoResponse {
     match Admin::get_by_email(&pool, &payload.email).await {
         Ok(Some(admin)) if admin.verify_password(&payload.password) => {
             session.insert("admin_id", admin.id).await.unwrap();
@@ -50,9 +63,7 @@ pub async fn admin_dashboard(State(pool): State<PgPool>, session: Session) -> im
 
     if let Some(id) = admin_id {
         if let Ok(Some(admin)) = Admin::get_by_id(&pool, id).await {
-            return admin_layout("Dashboard", admin_dashboard_template(&admin), "", &admin)
-                .render()
-                .into_response();
+            return admin_layout("Dashboard", admin_dashboard_template(&admin), "", Some(&admin)).render().into_response();
         }
     }
 
@@ -60,13 +71,22 @@ pub async fn admin_dashboard(State(pool): State<PgPool>, session: Session) -> im
 }
 
 pub async fn admin_account(State(pool): State<PgPool>, session: Session) -> impl IntoResponse {
+    let token = "asdasdasdasd".to_string();
+    let mut context: HashMap<String, Type> = HashMap::new();
+    context.insert("csrf_token".to_string(), Type::Text(token.clone()));
+    context.insert("first_name".to_string(), Type::Text("John".to_string()));
+    context.insert("last_name".to_string(), Type::Text("Doe".to_string()));
+    context.insert("email".to_string(), Type::Text("johndoe@gmail.com".to_string()));
+    context.insert("profile_image_url".to_string(), Type::Text("".to_string()));
+    context.insert("phone".to_string(), Type::Text("".to_string()));
+    context.insert("last_login".to_string(), Type::Text("Never".to_string()));
+    context.insert("created_at".to_string(), Type::Text("".to_string()));
+
     let admin_id: Option<i64> = session.get("admin_id").await.unwrap_or(None);
 
     if let Some(id) = admin_id {
         if let Ok(Some(admin)) = Admin::get_by_id(&pool, id).await {
-            return admin_layout("Account", admin_account_template(&admin), "", &admin)
-                .render()
-                .into_response();
+            return admin_layout("Account", admin_account_template(&context), &token, Some(&admin)).render().into_response();
         }
     }
 

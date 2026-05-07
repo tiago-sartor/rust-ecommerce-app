@@ -1,23 +1,16 @@
-use crate::models::admin::Admin;
+use crate::server::backend_handlers::Type;
+use crate::shared::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
+use std::collections::HashMap;
 
-// Define missing elements for type-checking in rsx!
-mod hypertext_elements {
-    pub use hypertext::validation::hypertext_elements::*;
-    hypertext::define_elements! {
-        svg {}
-        path {}
-    }
-}
-
-pub fn admin_account(admin: &Admin) -> impl Renderable {
+pub fn admin_account(context: &HashMap<String, Type>) -> impl Renderable {
     rsx! {
     <div x-data=(format!(r#"{{
         isProfileInfoModal: false,
         profileImage: '{}',
         async uploadProfileImage(event) {{
-            const file = event.target.files[0];
+            const file = event.target.files[0]; 
             if (!file) return;
 
             const formData = new FormData(this.$refs.profileImageForm);
@@ -34,7 +27,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                 }}
             }} catch (error) {{ console.error('Upload failed:', error); }}
         }},
-    }}"#, admin.profile_image_url.as_deref().unwrap_or(""))) >
+    }}"#, if let Some(Type::Text(v)) = context.get("profile_image_url") { v.as_str() } else { "" })) >
         <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
             <div class="rounded-2xl border border-gray-200 bg-white p-5 lg:p-6">
                 <h3 class="mb-5 text-lg font-semibold text-gray-800 lg:mb-7">
@@ -46,7 +39,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                         <div class="flex flex-col items-center w-full gap-6 xl:flex-row">
                             <form class="relative w-20 h-20 border border-gray-200 rounded-full cursor-pointer"
                                 x-on:click="$refs.profileImageInput.click()" x-ref="profileImageForm">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="csrf_token" value=(if let Some(Type::Text(v)) = context.get("csrf_token") { v.as_str() } else { "" }) />
                                 <input type="file" accept="image/png,image/jpg,image/jpeg,image/webp" class="sr-only"
                                     name="admin_profile_image" id="admin_profile_image" x-on:change="uploadProfileImage($event)"
                                     x-ref="profileImageInput">
@@ -73,11 +66,13 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                             </form>
                             <div class="order-3 xl:order-2">
                                 <h4 class="mb-2 text-lg font-semibold text-center text-gray-800 xl:text-left">
-                                    (admin.first_name) " " (admin.last_name)
+                                    (if let Some(Type::Text(v)) = context.get("first_name") { v.as_str() } else { "" })
+                                    " "
+                                    (if let Some(Type::Text(v)) = context.get("last_name") { v.as_str() } else { "" })
                                 </h4>
                                 <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                                     <p class="text-sm text-gray-500 capitalize">
-                                        (format!("{:?}", admin.role))
+                                        (format!("{:?}", (if let Some(Type::Text(v)) = context.get("first_name") { v.as_str() } else { "" })))
                                     </p>
                                 </div>
                             </div>
@@ -107,7 +102,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "First Name"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (admin.first_name)
+                                        (if let Some(Type::Text(v)) = context.get("first_name") { v.as_str() } else { "" })
                                     </p>
                                 </div>
 
@@ -116,7 +111,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "Last Name"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (admin.last_name)
+                                        (if let Some(Type::Text(v)) = context.get("last_name") { v.as_str() } else { "" })
                                     </p>
                                 </div>
 
@@ -125,7 +120,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "E-mail"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (admin.email)
+                                        (if let Some(Type::Text(v)) = context.get("email") { v.as_str() } else { "" })
                                     </p>
                                 </div>
 
@@ -134,7 +129,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "Phone"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (admin.phone)
+                                        (if let Some(Type::Text(v)) = context.get("phone") { v.as_str() } else { "" })
                                     </p>
                                 </div>
                             </div>
@@ -155,7 +150,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "Last Login"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (admin.last_login.map(|d| format!("{}", d)).unwrap_or_else(|| "Never".to_string()))
+                                        (if let Some(Type::Text(v)) = context.get("last_login") { v.as_str() } else { "Never" })
                                     </p>
                                 </div>
                                 <div>
@@ -163,7 +158,7 @@ pub fn admin_account(admin: &Admin) -> impl Renderable {
                                         "Registered Since"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (format!("{}", admin.created_at))
+                                        (if let Some(Type::Text(v)) = context.get("created_at") { v.as_str() } else { "" })
                                     </p>
                                 </div>
                             </div>

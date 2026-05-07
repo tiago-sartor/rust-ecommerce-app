@@ -17,19 +17,9 @@ pub struct AdminErrors<'a> {
     pub phone: Option<Vec<&'a str>>,
 }
 
-// Define missing elements for type-checking in rsx!
-mod hypertext_elements {
-    pub use hypertext::validation::hypertext_elements::*;
-    hypertext::define_elements! {
-        svg {}
-        path {}
-    }
-}
+use crate::shared::hypertext_elements;
 
-pub fn admin_edit_account_modal<'a>(
-    csrf_token: &'a str,
-    admin: &'a AdminInfo<'a>,
-) -> impl Renderable + 'a {
+pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a>) -> impl Renderable + 'a {
     rsx! {
         <div x-show="isProfileInfoModal" class="fixed inset-0 flex items-center justify-center p-5 overflow-y-auto z-99999">
             <div class="modal-close-btn fixed inset-0 h-full w-full bg-gray-400/50 backdrop-blur-lg"></div>

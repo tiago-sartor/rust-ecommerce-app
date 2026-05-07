@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS attribute_groups (
     description TEXT,
     image TEXT,
     sort_order INT DEFAULT 0,
-    created_at TIMESTAMPZ DEFAULT now(),
-    updated_at TIMESTAMPZ DEFAULT now()
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );

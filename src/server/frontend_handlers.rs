@@ -15,11 +15,43 @@ pub struct LoginPayload {
     pub password: String,
 }
 
-pub async fn customer_login_post(
-    State(pool): State<PgPool>,
-    session: Session,
-    Form(payload): Form<LoginPayload>,
-) -> impl IntoResponse {
+pub async fn customer_account() -> Html<String> {
+    Html("<h1>My Account</h1>".to_string())
+}
+
+pub async fn customer_edit_account() -> Html<String> {
+    Html("<h1>Edit Account</h1>".to_string())
+}
+
+pub async fn customer_password() -> Html<String> {
+    Html("<h1>Change Password</h1>".to_string())
+}
+
+pub async fn customer_orders() -> Html<String> {
+    Html("<h1>My Orders</h1>".to_string())
+}
+
+pub async fn customer_order_details() -> Html<String> {
+    Html("<h1>Order Details</h1>".to_string())
+}
+
+pub async fn customer_address() -> Html<String> {
+    Html("<h1>My Addresses</h1>".to_string())
+}
+
+pub async fn customer_edit_address() -> Html<String> {
+    Html("<h1>Edit Address</h1>".to_string())
+}
+
+pub async fn customer_wishlist() -> Html<String> {
+    Html("<h1>My Wishlist</h1>".to_string())
+}
+
+pub async fn login_page() -> Html<String> {
+    Html("<h1>Login Page</h1>".to_string())
+}
+
+pub async fn customer_login_post(State(pool): State<PgPool>, session: Session, Form(payload): Form<LoginPayload>) -> impl IntoResponse {
     match Customer::get_by_email(&pool, &payload.email).await {
         Ok(Some(customer)) if customer.verify_password(&payload.password) => {
             session.insert("customer_id", customer.id).await.unwrap();
@@ -204,15 +236,13 @@ pub async fn home_page() -> Html<&'static str> {
 }
 
 /// GET /products - Products listing page
-pub async fn products_page() -> Json<Vec<Product>> {
+pub async fn catalog_page() -> Json<Vec<Product>> {
     Json(get_mock_products())
 }
 
 /// GET /products/:slug - Product detail page
 pub async fn product_detail_page(Path(slug): Path<String>) -> Result<Json<Product>, StatusCode> {
-    get_mock_product_by_slug(&slug)
-        .map(Json)
-        .ok_or(StatusCode::NOT_FOUND)
+    get_mock_product_by_slug(&slug).map(Json).ok_or(StatusCode::NOT_FOUND)
 }
 
 /// GET /cart - Cart page

@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS categories (
     name TEXT NOT NULL,
     description TEXT,
     image_url TEXT,
-    created_at TIMESTAMPZ DEFAULT now(),
-    updated_at TIMESTAMPZ DEFAULT now()
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );

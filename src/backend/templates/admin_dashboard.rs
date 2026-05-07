@@ -1,15 +1,8 @@
 use crate::models::admin::Admin;
 use hypertext::validation::attributes::*;
-use hypertext::{rsx, Renderable};
+use hypertext::{Renderable, rsx};
 
-// Define missing elements for type-checking in rsx!
-mod hypertext_elements {
-    pub use hypertext::validation::hypertext_elements::*;
-    hypertext::define_elements! {
-    svg {}
-    path {}
-    }
-}
+use crate::shared::hypertext_elements;
 
 pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
     rsx! {

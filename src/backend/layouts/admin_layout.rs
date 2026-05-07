@@ -11,7 +11,7 @@ mod hypertext_elements {
 
 use crate::models::admin::Admin;
 
-pub fn admin_layout(title: &str, content: impl Renderable, csrf_token: &str, admin: &Admin) -> impl Renderable {
+pub fn admin_layout(title: &str, content: impl Renderable, csrf_token: &str, admin: Option<&Admin>) -> impl Renderable {
     let full_title = format!("{title} | Admin Dashboard");
 
     rsx! {
@@ -663,17 +663,19 @@ pub fn admin_layout(title: &str, content: impl Renderable, csrf_token: &str, adm
                                 // User Area
                                 <div
                                     class="relative"
-                                    x-data="{ dropdownOpen: false, profileImage: '' }"
+                                    x-data=(format!(r#"{{ dropdownOpen: false, profileImage: '{}' }}"#, admin.and_then(|a| a.profile_image_url.as_deref()).unwrap_or("")))
                                     x-on:click.outside="dropdownOpen = false">
                                     <a
                                         class="flex items-center text-gray-700 "
                                         href="#"
                                         x-on:click.prevent="dropdownOpen = ! dropdownOpen">
                                         <span class="mr-3 h-11 w-11 border border-gray-200 rounded-full">
-                                            <template x-if="profileImage">
-                                                <img x-bind:src="profileImage" alt="admin profile image" class="object-cover size-full rounded-full" />
-                                            </template>
-                                            <template x-if="!profileImage">
+                                            @if let Some(url) = admin.and_then(|a| a.profile_image_url.as_deref()) {
+                                                <template x-if="profileImage">
+                                                    <img x-bind:src="profileImage" alt="admin profile image" class="object-cover size-full rounded-full" />
+                                                </template>
+                                            }
+                                            <template x-if=(if admin.and_then(|a| a.profile_image_url.as_deref()).is_some() { "!profileImage" } else { "true" })>
                                                 <svg class="object-cover size-full rounded-full" "viewBox"="312.81 0 401 401">
                                                     <path "fill"="#e4e6e7" "d"="M268.073-44.735h490.423v490.423H268.073z"></path>
                                                     <path "fill"="#aeb4b7" "d"="M513.81 267.142c-103.361 0-187.754 58.93-192.475 132.842h384.988c-4.733-73.918-89.157-132.842-192.512-132.842m96.605-109.116c0 57.17-42.935 103.516-95.896 103.516s-95.895-46.346-95.895-103.516S461.559 54.51 514.52 54.51c52.968 0 95.896 46.352 95.896 103.515z"></path>
@@ -681,7 +683,11 @@ pub fn admin_layout(title: &str, content: impl Renderable, csrf_token: &str, adm
                                             </template>
                                         </span>
 
-                                        <span class="text-sm mr-1 block font-medium">(admin.first_name) " " (admin.last_name)</span>
+                                        @if let Some(a) = admin {
+                                            <span class="text-sm mr-1 block font-medium">(a.first_name) " " (a.last_name)</span>
+                                        } @else {
+                                            <span class="text-sm mr-1 block font-medium">"Guest"</span>
+                                        }
 
                                         <svg
                                             x-bind:class="dropdownOpen && 'rotate-180'"
@@ -704,14 +710,16 @@ pub fn admin_layout(title: &str, content: impl Renderable, csrf_token: &str, adm
                                         x-show="dropdownOpen"
                                         class="shadow-lg absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 ">
                                         <div>
-                                            <span
-                                                class="text-sm block font-medium text-gray-700 ">
-                                                (admin.first_name) " " (admin.last_name)
-                                            </span>
-                                            <span
-                                                class="text-xs mt-0.5 block text-gray-500 ">
-                                                (admin.email)
-                                            </span>
+                                            @if let Some(a) = admin {
+                                                <span
+                                                    class="text-sm block font-medium text-gray-700 ">
+                                                    (a.first_name) " " (a.last_name)
+                                                </span>
+                                                <span
+                                                    class="text-xs mt-0.5 block text-gray-500 ">
+                                                    (a.email)
+                                                </span>
+                                            }
                                         </div>
 
                                         <ul
