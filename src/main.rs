@@ -1,7 +1,4 @@
-use axum::{
-    Router,
-    routing::{get, post},
-};
+use axum::{Router, routing::get};
 use sqlx::PgPool;
 use tower_http::cors::CorsLayer;
 use tower_sessions::{Expiry, SessionManagerLayer};
@@ -30,6 +27,8 @@ async fn main() {
         .nest("/admin", routes::protected_admin_routes())
         .route("/admin/login", get(backend_handlers::admin_login_get).post(backend_handlers::admin_login_post))
         .route("/admin/logout", get(backend_handlers::admin_logout))
+        .route("/admin/forgot-password", get(backend_handlers::admin_forgot_password_get).post(backend_handlers::admin_forgot_password_post))
+        .route("/admin/reset-password", get(backend_handlers::admin_reset_password_get).post(backend_handlers::admin_reset_password_post))
         // Static files
         .nest_service("/public", tower_http::services::ServeDir::new("public"))
         .layer(session_layer)

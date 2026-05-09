@@ -72,7 +72,7 @@ pub fn admin_account(context: &HashMap<String, Type>) -> impl Renderable {
                                 </h4>
                                 <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                                     <p class="text-sm text-gray-500 capitalize">
-                                        (format!("{:?}", (if let Some(Type::Text(v)) = context.get("first_name") { v.as_str() } else { "" })))
+                                        (if let Some(Type::Text(v)) = context.get("role") { v.as_str() } else { "" })
                                     </p>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@ pub fn admin_account(context: &HashMap<String, Type>) -> impl Renderable {
                                         "Last Login"
                                     </p>
                                     <p class="text-sm font-medium text-gray-800">
-                                        (if let Some(Type::Text(v)) = context.get("last_login") { v.as_str() } else { "Never" })
+                                        (if let Some(Type::Text(v)) = context.get("last_login") { v.as_str() } else { "" })
                                     </p>
                                 </div>
                                 <div>

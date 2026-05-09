@@ -6,6 +6,10 @@ use std::collections::HashMap;
 use crate::shared::hypertext_elements;
 
 pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
+    let payload = if let Some(Type::Map(map)) = context.get("payload") { Some(map) } else { None };
+    let errors = if let Some(Type::Map(map)) = context.get("errors") { Some(map) } else { None };
+    let pwd_reset_success = matches!(context.get("password_reset_success"), Some(Type::Bool(v)) if *v == true);
+
     rsx! {
         // ===== Page Wrapper Start =====
         <div
@@ -67,19 +71,17 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                                 <span class="text-red-600" aria-hidden="true">"*"</span>
                                             </label>
                                             <input
+                                                class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                                value=(payload.and_then(|p| p.get("email")).unwrap_or(&"".to_string())) 
                                                 type="email"
                                                 id="email"
                                                 name="email"
-                                                value=(if let Some(Type::Text(v)) = context.get("email") { v.as_str() } else { "" })
                                                 autocomplete="email"
-                                                placeholder="johndoe@gmail.com"
-                                                autocomplete="email"
-                                                class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70" />
-                                                @if let Some(Type::Map(errors)) = context.get("errors") {
-                                                    @if let Some(err) = errors.get("email") {
-                                                        <p class="mt-1 text-xs text-red-700">(err)</p>
-                                                    }
-                                                }
+                                                placeholder="johndoe@example.com"
+                                                autocomplete="email" required />
+                                            @if let Some(err) = errors.and_then(|m| m.get("login")) {
+                                                <p class="mt-1 text-xs text-red-700">(err)</p>
+                                            }
                                         </div>
                                         // Password
                                         <div>
@@ -127,11 +129,6 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                                     </svg>
                                                 </span>
                                             </div>
-                                            @if let Some(Type::Map(errors)) = &context.get("errors") {
-                                                @if let Some(err) = errors.get("email") {
-                                                    <p class="mt-1 text-xs text-red-700">(err)</p>
-                                                }
-                                            }
                                         </div>
                                         // Checkbox
                                         <div class="flex items-center justify-between">
@@ -152,7 +149,7 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                                     "Keep me logged in"
                                                 </label>
                                             </div>
-                                            <a href="/admin/forgot-password" class="text-sm text-neutral-600 underline decoration-transparent underline-offset-4 transition-colors hover:text-neutral-800 hover:decoration-neutral-800">
+                                            <a href="/admin/forgot-password" class="text-sm underline decoration-transparent underline-offset-4 transition-colors text-neutral-800 hover:decoration-neutral-800">
                                                 "Forgot password?"
                                             </a>
                                         </div>
@@ -166,6 +163,11 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                         </div>
                                     </div>
                                 </form>
+                                @if pwd_reset_success == true {
+                                    <div class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
+                                        "Your password has been reset. You can now login."
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>

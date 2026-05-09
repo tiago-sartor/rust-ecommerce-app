@@ -1,10 +1,12 @@
-use crate::models::admin::Admin;
+use std::collections::HashMap;
+
+use crate::server::backend_handlers::Type;
+use crate::shared::hypertext_elements;
+
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
 
-use crate::shared::hypertext_elements;
-
-pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
+pub fn admin_dashboard(context: &HashMap<String, Type>) -> impl Renderable {
     rsx! {
         <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
             <div class="grid grid-cols-12 gap-4 md:gap-6">
@@ -76,13 +78,13 @@ pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
                             </h3>
 
                             <div x-data="{openDropDown: false}" class="relative h-fit">
-                                <button @click="openDropDown = !openDropDown"
+                                <button x-on:click="openDropDown = !openDropDown"
                                     x-bind:class="openDropDown ? 'text-gray-700 ' : 'text-gray-400 hover:text-gray-700 '">
                                     <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                                         <path "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z" "fill"=""></path>
                                     </svg>
                                 </button>
-                                <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                <div x-show="openDropDown" x-on:click.outside="openDropDown = false"
                                     class="absolute right-0 z-40 w-40 p-2 space-y-1 bg-white border border-gray-200 top-full rounded-2xl shadow-theme-lg  ">
                                     <button class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700   ">
                                         "View More"
@@ -116,13 +118,13 @@ pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
                                     </p>
                                 </div>
                                 <div x-data="{openDropDown: false}" class="relative h-fit">
-                                    <button @click="openDropDown = !openDropDown"
+                                    <button x-on:click="openDropDown = !openDropDown"
                                         x-bind:class="openDropDown ? 'text-gray-700 ' : 'text-gray-400 hover:text-gray-700 '">
                                         <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                                             <path "fill"="" "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"></path>
                                         </svg>
                                     </button>
-                                    <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                    <div x-show="openDropDown" x-on:click.outside="openDropDown = false"
                                         class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg  ">
                                         <button class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700   ">
                                             "View More"
@@ -207,17 +209,17 @@ pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
                             <div class="flex items-start w-full gap-3 sm:justify-end">
                                 <div x-data="{selected: 'overview'}"
                                     class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 ">
-                                    <button @click="selected = 'overview'"
+                                    <button x-on:click="selected = 'overview'"
                                         x-bind:class="selected === 'overview' ? 'shadow-theme-xs text-gray-900  bg-white ' : 'text-gray-500 '"
                                         class="px-3 py-2 font-medium rounded-md text-sm hover:text-gray-900 ">
                                         "Overview"
                                     </button>
-                                    <button @click="selected = 'sales'"
+                                    <button x-on:click="selected = 'sales'"
                                         x-bind:class="selected === 'sales' ? 'shadow-theme-xs text-gray-900  bg-white ' : 'text-gray-500 '"
                                         class="px-3 py-2 font-medium rounded-md text-sm hover:text-gray-900 ">
                                         "Sales"
                                     </button>
-                                    <button @click="selected = 'revenue'"
+                                    <button x-on:click="selected = 'revenue'"
                                         x-bind:class="selected === 'revenue' ? 'shadow-theme-xs text-gray-900  bg-white ' : 'text-gray-500 '"
                                         class="px-3 py-2 font-medium rounded-md text-sm hover:text-gray-900 ">
                                         "Revenue"
@@ -259,7 +261,7 @@ pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
                             </div>
 
                             <div x-data="{openDropDown: false}" class="relative h-fit">
-                                <button @click="openDropDown = !openDropDown"
+                                <button x-on:click="openDropDown = !openDropDown"
                                     x-bind:class="openDropDown ? 'text-gray-700 ' : 'text-gray-400 hover:text-gray-700 '">
                                     <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                                         <path "fill-rule"="evenodd" "clip-rule"="evenodd"
@@ -267,7 +269,7 @@ pub fn admin_dashboard(admin: &Admin) -> impl Renderable {
                                             "fill"=""></path>
                                     </svg>
                                 </button>
-                                <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                <div x-show="openDropDown" x-on:click.outside="openDropDown = false"
                                     class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg  ">
                                     <button
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700   ">

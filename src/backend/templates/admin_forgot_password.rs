@@ -1,17 +1,15 @@
-use crate::models::admin::Admin;
+use crate::server::backend_handlers::Type;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
+use std::collections::HashMap;
 
 use crate::shared::hypertext_elements;
 
-pub struct AdminForgotPasswordTemplate {
-    pub csrf_token: String,
-    pub email: String,
-    pub errors: std::collections::HashMap<String, Vec<String>>,
-    pub success: bool,
-}
+pub fn admin_forgot_password(context: &HashMap<String, Type>) -> impl Renderable {
+    let payload = if let Some(Type::Map(map)) = context.get("payload") { Some(map) } else { None };
+    let errors = context.get("errors").and_then(|t| if let Type::Map(m) = t { Some(m) } else { None });
+    let success = matches!(context.get("forgot_password_success"), Some(Type::Bool(v)) if *v == true);
 
-pub fn admin_forgot_password(context: &AdminForgotPasswordTemplate) -> impl Renderable {
     rsx! {
         // ===== Page Wrapper Start =====
         <div x-data="{ page: 'forgot-password', 'loaded': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
@@ -39,7 +37,7 @@ pub fn admin_forgot_password(context: &AdminForgotPasswordTemplate) -> impl Rend
                             </p>
                         </div>
                         <form action="/admin/forgot-password" method="POST">
-                            <input type="hidden" name="csrf_token" value=(context.csrf_token) />
+                            <input type="hidden" name="csrf_token" value=(if let Some(Type::Text(v)) = context.get("csrf_token") { v.as_str() } else { "" }) />
                             <div class="space-y-5">
                                 // Email
                                 <div>
@@ -47,11 +45,13 @@ pub fn admin_forgot_password(context: &AdminForgotPasswordTemplate) -> impl Rend
                                         "E-mail"
                                         <span class="text-red-600" aria-hidden="true">"*"</span>
                                     </label>
-                                    <input type="email" id="email" name="email" value=(context.email) placeholder="johndoe@gmail.com" autocomplete="email" class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70" />
-                                    @if let Some(error) = &context.errors.get("email") {
-                                        @if let Some(err) = error.first() {
-                                            <p class="mt-1 text-xs text-red-700">(err)</p>
-                                        }
+                                    <input
+                                        class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                        value=(payload.and_then(|p| p.get("email")))
+                                        type="email" id="email" name="email"
+                                        placeholder="johndoe@example.com" autocomplete="email" />
+                                    @if let Some(err) = errors.and_then(|m| m.get("email")) {
+                                        <p class="mt-1 text-xs text-red-700">(err)</p>
                                     }
                                 </div>
                                 // Button
@@ -63,10 +63,10 @@ pub fn admin_forgot_password(context: &AdminForgotPasswordTemplate) -> impl Rend
                                 </div>
                             </div>
                         </form>
-                        @if context.success == true {
+                        @if success == true {
                             <div
                                 class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
-                                "If an account exists with this email, a password reset link has been sent."
+                                "If an account with this email exists, a password reset link will be sent."
                             </div>
                         }
                     </div>
