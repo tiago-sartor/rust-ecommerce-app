@@ -72,13 +72,13 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                             </label>
                                             <input
                                                 class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
-                                                value=(payload.and_then(|p| p.get("email")).unwrap_or(&"".to_string())) 
                                                 type="email"
                                                 id="email"
                                                 name="email"
-                                                autocomplete="email"
+                                                value=(payload.and_then(|p| p.get("email")).unwrap_or(&"".to_string()))
                                                 placeholder="johndoe@example.com"
-                                                autocomplete="email" required />
+                                                autocomplete="email"
+                                                required />
                                             @if let Some(err) = errors.and_then(|m| m.get("login")) {
                                                 <p class="mt-1 text-xs text-red-700">(err)</p>
                                             }
@@ -93,11 +93,12 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                             <div x-data="{ showPassword: false }" class="relative">
                                                 <input
                                                     x-bind:type="showPassword ? 'text' : 'password'"
+                                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                                     id="password"
                                                     name="password"
                                                     placeholder="Enter your password"
                                                     autocomplete="current-password"
-                                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70" />
+                                                    required />
                                                 <span
                                                     x-on:click="showPassword = !showPassword"
                                                     class="absolute z-30 text-neutral-500 -translate-y-1/2 cursor-pointer right-4 top-1/2">

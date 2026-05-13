@@ -16,4 +16,5 @@ pub mod server;
 #[path = "shared/mod.rs"]
 pub mod shared;
 
-pub mod helpers;
+#[path = "utils/mod.rs"]
+pub mod utils;

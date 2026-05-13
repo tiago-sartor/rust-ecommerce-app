@@ -47,9 +47,13 @@ pub fn admin_forgot_password(context: &HashMap<String, Type>) -> impl Renderable
                                     </label>
                                     <input
                                         class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                        type="email"
+                                        id="email"
+                                        name="email"
                                         value=(payload.and_then(|p| p.get("email")))
-                                        type="email" id="email" name="email"
-                                        placeholder="johndoe@example.com" autocomplete="email" />
+                                        placeholder="johndoe@example.com"
+                                        autocomplete="email"
+                                        required />
                                     @if let Some(err) = errors.and_then(|m| m.get("email")) {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
                                     }

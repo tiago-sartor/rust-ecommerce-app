@@ -77,7 +77,7 @@ impl Customer {
 }
 
 pub async fn get_customer_by_id(customer_id: i64) -> Option<Customer> {
-    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+    let now = OffsetDateTime::now_utc();
 
     // Simulate fetching customer from a database
     Some(Customer {
@@ -100,7 +100,7 @@ pub async fn get_customer_by_id(customer_id: i64) -> Option<Customer> {
 }
 
 pub async fn get_customer_by_email(email: &str) -> Option<Customer> {
-    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+    let now = OffsetDateTime::now_utc();
 
     // Simulate fetching customer from a database
     if email == "john.doe@example.com" {
@@ -127,7 +127,7 @@ pub async fn get_customer_by_email(email: &str) -> Option<Customer> {
 }
 
 pub async fn get_customer_by_cpf(cpf: &str) -> Option<Customer> {
-    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+    let now = OffsetDateTime::now_utc();
 
     // Simulate fetching customer from a database
     if cpf == "123.456.789-00" {
@@ -154,7 +154,7 @@ pub async fn get_customer_by_cpf(cpf: &str) -> Option<Customer> {
 }
 
 pub async fn get_customer_by_cnpj(cnpj: &str) -> Option<Customer> {
-    let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
+    let now = OffsetDateTime::now_utc();
 
     // Simulate fetching customer from a database
     if cnpj == "12.345.678/0001-00" {

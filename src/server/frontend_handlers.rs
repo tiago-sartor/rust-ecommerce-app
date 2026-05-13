@@ -1,4 +1,6 @@
 use crate::models::customer::Customer;
+use crate::utils::errors::AppError;
+use crate::utils::helpers;
 use axum::{
     Json,
     extract::{Form, Path, State},
@@ -51,19 +53,23 @@ pub async fn login_page() -> Html<String> {
     Html("<h1>Login Page</h1>".to_string())
 }
 
-pub async fn customer_login_post(State(pool): State<PgPool>, session: Session, Form(payload): Form<LoginPayload>) -> impl IntoResponse {
-    match Customer::get_by_email(&pool, &payload.email).await {
-        Ok(Some(customer)) if customer.verify_password(&payload.password) => {
-            session.insert("customer_id", customer.id).await.unwrap();
-            Redirect::to("/").into_response()
+pub async fn customer_login_post(State(pool): State<PgPool>, session: Session, Form(payload): Form<LoginPayload>) -> Result<impl IntoResponse, AppError> {
+    match Customer::get_by_email(&pool, &payload.email).await? {
+        Some(customer) if customer.verify_password(&payload.password) => {
+            session.insert("customer_id", customer.id).await?;
+            session.insert("csrf_token", helpers::generate_random_token(64)).await?;
+
+            Ok(Redirect::to("/").into_response())
         }
-        _ => Redirect::to("/login").into_response(),
+        _ => Ok(Redirect::to("/login").into_response()),
     }
 }
 
-pub async fn customer_logout(session: Session) -> impl IntoResponse {
+pub async fn customer_logout(session: Session) -> Result<impl IntoResponse, AppError> {
     session.clear().await;
-    Redirect::to("/login")
+    helpers::regenerate_session(&session).await?;
+
+    Ok(Redirect::to("/login").into_response())
 }
 
 // Mock data structures

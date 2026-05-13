@@ -7,8 +7,8 @@ use crate::shared::hypertext_elements;
 
 pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable {
     let payload = if let Some(Type::Map(map)) = context.get("payload") { Some(map) } else { None };
-    let errors = context.get("errors").and_then(|t| if let Type::Map(m) = t { Some(m) } else { None });
-    
+    let errors = context.get("errors").and_then(|e| if let Type::Map(map) = e { Some(map) } else { None });
+
     rsx! {
         // ===== Page Wrapper Start =====
         <div
@@ -47,11 +47,12 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                     <div x-data="{ showPassword: false }" class="relative">
                                         <input
                                             x-bind:type="showPassword ? 'text' : 'password'"
+                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                             id="password"
                                             name="password"
                                             value=(payload.and_then(|p| p.get("password")))
                                             placeholder="Enter new password"
-                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70" />
+                                            required />
                                         <span
                                             x-on:click="showPassword = !showPassword"
                                             class="absolute z-30 text-neutral-500 -translate-y-1/2 cursor-pointer right-4 top-1/2">
@@ -96,11 +97,12 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                     <div x-data="{ showPassword: false }" class="relative">
                                         <input
                                             x-bind:type="showPassword ? 'text' : 'password'"
+                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                             id="confirm_password"
                                             name="confirm_password"
                                             value=(payload.and_then(|p| p.get("confirm_password")))
                                             placeholder="Confirm new password"
-                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70" />
+                                            required />
                                         <span
                                             x-on:click="showPassword = !showPassword"
                                             class="absolute z-30 text-neutral-500 -translate-y-1/2 cursor-pointer right-4 top-1/2">
@@ -145,7 +147,12 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                     </button>
                                 </div>
                             </div>
-                        </form>                        
+                        </form>
+                        @if let Some(err) = errors.and_then(|m| m.get("internal_error")) {
+                            <div class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
+                                (err)
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
