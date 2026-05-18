@@ -1,13 +1,30 @@
 use crate::utils::errors::AppError;
-use argon2::{
-    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
-    password_hash::{SaltString, rand_core::OsRng},
-};
 use rand::distr::{Alphanumeric, SampleString};
 use serde::Serialize;
 use serde_json::Value;
 use std::collections::HashMap;
+use time::OffsetDateTime;
 use tower_sessions::Session;
+
+/**
+ * Format a standard UTC datetime to Brazil offset and format
+ */
+pub fn format_datetime_to_br(datetime: OffsetDateTime) -> String {
+    const MONTHS_BR: [&str; 12] = [
+        "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", 
+        "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+    ];
+    let d = datetime.to_offset(time::macros::offset!(-3));
+
+    format!(
+        "{:02} {} {} {:02}:{:02}",
+        d.day(),
+        MONTHS_BR[d.month() as usize - 1],
+        d.year(),
+        d.hour(),
+        d.minute()
+    )
+}
 
 /**
  * Convert any serializable struct into a HashMap<String, String>
@@ -34,30 +51,6 @@ pub fn struct_to_map<T: Serialize>(input: &T) -> HashMap<String, String> {
  */
 pub fn generate_random_token(length: usize) -> String {
     return Alphanumeric.sample_string(&mut rand::rng(), length);
-}
-
-/**
- * Hash a password before saving it to the database
- */
-pub fn hash_password(password: &str) -> Result<String, AppError> {
-    let salt = SaltString::generate(&mut OsRng);
-    let argon2 = Argon2::default();
-
-    match argon2.hash_password(password.as_bytes(), &salt) {
-        Ok(hash) => Ok(hash.to_string()),
-        Err(e) => Err(AppError::Internal(e.to_string())),
-    }
-}
-
-/**
- * Verify a user-provided password against its hash from the database
- */
-pub fn verify_password(stored_password_hash: &str, provided_password: &str) -> bool {
-    let argon2 = Argon2::default();
-    match PasswordHash::new(stored_password_hash) {
-        Ok(parsed_hash) => argon2.verify_password(provided_password.as_bytes(), &parsed_hash).is_ok(),
-        Err(_) => false,
-    }
 }
 
 /**

@@ -1,2 +1,2 @@
 pub mod auth;
-pub mod csrf_middleware;
+pub mod csrf;

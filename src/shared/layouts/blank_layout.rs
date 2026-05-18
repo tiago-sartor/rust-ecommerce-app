@@ -1,12 +1,11 @@
+use crate::server::backend_handlers::Context;
+use crate::utils::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
 
-use crate::server::backend_handlers::Type;
-use crate::shared::hypertext_elements;
-use std::collections::HashMap;
+pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P, D>) -> impl Renderable {
+    let full_title = format!("{title} | Rust Ecommerce App");
 
-pub fn blank_layout(title: &str, content: impl Renderable, context: &HashMap<String, Type>) -> impl Renderable {
-    let full_title = format!("{title} | Sartorello Móveis");
     rsx! {
         <!DOCTYPE html>
         <html lang="en-US">
@@ -15,7 +14,7 @@ pub fn blank_layout(title: &str, content: impl Renderable, context: &HashMap<Str
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             // CSRF Token
-            <meta name="csrf_token" content=(if let Some(Type::Text(v)) = context.get("csrf_token") { v.as_str() } else { "" })>
+            <meta name="csrf_token" content=(ctx.csrf_token.0)>
             // Title
             <title>(full_title)</title>
             // Favicon

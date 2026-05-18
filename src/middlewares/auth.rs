@@ -1,27 +1,34 @@
+use crate::models::admin::Admin;
+use crate::models::customer::Customer;
+use crate::utils::errors::AppError;
 use axum::{
-    extract::Request,
-    http::StatusCode,
+    extract::{Request, State},
     middleware::Next,
     response::{IntoResponse, Redirect, Response},
 };
+use sqlx::PgPool;
 use tower_sessions::Session;
 
-pub async fn admin_auth(session: Session, request: Request, next: Next) -> Result<Response, StatusCode> {
-    let admin_id: Option<i64> = session.get("admin_id").await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+pub async fn admin_auth(State(pool): State<PgPool>, session: Session, mut request: Request, next: Next) -> Result<Response, AppError> {
+    if let Some(id) = session.get("admin_id").await? {
+        if let Some(admin) = Admin::get_by_id(&pool, &id).await? {
+            request.extensions_mut().insert(admin);
 
-    if admin_id.is_some() {
-        Ok(next.run(request).await)
-    } else {
-        Ok(Redirect::to("/admin/login").into_response())
+            return Ok(next.run(request).await);
+        }
     }
+
+    Ok(Redirect::to("/admin/login").into_response())
 }
 
-pub async fn customer_auth(session: Session, request: Request, next: Next) -> Result<Response, StatusCode> {
-    let customer_id: Option<i64> = session.get("customer_id").await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+pub async fn customer_auth(State(pool): State<PgPool>, session: Session, mut request: Request, next: Next) -> Result<Response, AppError> {
+    if let Some(id) = session.get("customer_id").await? {
+        if let Some(customer) = Customer::get_by_id(&pool, &id).await? {
+            request.extensions_mut().insert(customer);
 
-    if customer_id.is_some() {
-        Ok(next.run(request).await)
-    } else {
-        Ok(Redirect::to("/login").into_response())
+            return Ok(next.run(request).await);
+        }
     }
+
+    Ok(Redirect::to("/login").into_response())
 }

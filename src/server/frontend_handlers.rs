@@ -55,7 +55,7 @@ pub async fn login_page() -> Html<String> {
 
 pub async fn customer_login_post(State(pool): State<PgPool>, session: Session, Form(payload): Form<LoginPayload>) -> Result<impl IntoResponse, AppError> {
     match Customer::get_by_email(&pool, &payload.email).await? {
-        Some(customer) if customer.verify_password(&payload.password) => {
+        Some(customer) if crate::utils::password::verify_password(&customer.password_hash, &payload.password) => {
             session.insert("customer_id", customer.id).await?;
             session.insert("csrf_token", helpers::generate_random_token(64)).await?;
 

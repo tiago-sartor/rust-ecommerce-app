@@ -1,13 +1,11 @@
+use crate::server::backend_handlers::Context;
+use crate::utils::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
 
-use crate::server::backend_handlers::Type;
-use crate::shared::hypertext_elements;
-use std::collections::HashMap;
+pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P, D>) -> impl Renderable {
+    let full_title = format!("{} | Admin Dashboard", title);
 
-pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<String, Type>) -> impl Renderable {
-    let full_title = format!("{title} | Admin Dashboard");
-    let admin = if let Some(Type::Map(admin)) = context.get("admin") { Some(admin) } else { None };
     rsx! {
         <!DOCTYPE html>
         <html lang="en-US">
@@ -16,7 +14,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             // CSRF
-            <meta name="csrf-token" content=(if let Some(Type::Text(v)) = context.get("csrf_token") { v.as_str() } else { "" })>
+            <meta name="csrf-token" content=(ctx.csrf_token.0)>
             // Title
             <title>(full_title)</title>
             // Favicon
@@ -43,7 +41,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                 // ===== Sidebar Start =====
                 <aside
                     x-bind:class="sidebarToggle ? 'translate-x-0 xl:w-[90px]' : '-translate-x-full'"
-                    class="fixed top-0 left-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white p-4 transition-all duration-300 xl:static xl:translate-x-0">
+                    class="fixed top-0 left-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-neutral-200 bg-white p-4 transition-all duration-300 xl:static xl:translate-x-0">
                     // SIDEBAR HEADER
                     <div x-bind:class="sidebarToggle ? 'justify-center' : 'justify-between'"
                         class="sidebar-header flex items-center gap-2 pt-4 pb-6">
@@ -295,7 +293,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                 // Menu Item Emails
                                 <li>
-                                    <a href="#" x-on:click="selected = (selected === 'Emails' ? '' : 'Emails')"
+                                    <a href="/admin/emails" x-on:click="selected = (selected === 'Emails' ? '' : 'Emails')"
                                         class="menu-item group"
                                         x-bind:class=" (selected === 'Emails') && (page === 'emails') ? 'menu-item-active' : 'menu-item-inactive'">
                                         <svg class="size-6" x-bind:class="(selected === 'Emails') && (page === 'emails') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor">
@@ -341,21 +339,21 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                     <div
                         x-on:click="sidebarToggle = false"
                         x-bind:class="sidebarToggle ? 'block lg:hidden' : 'hidden'"
-                        class="fixed w-full h-screen z-9 bg-gray-900/50"></div>
+                        class="fixed w-full h-screen z-9 bg-neutral-900/50"></div>
                     // Small Device Overlay End
 
                     // ===== Header Start =====
                     <header
                         x-data="{menuToggle: false}"
-                        class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white lg:border-b  ">
+                        class="sticky top-0 z-99999 flex w-full border-neutral-200 bg-white lg:border-b  ">
                         <div
                             class="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
                             <div
-                                class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 ">
+                                class="flex w-full items-center justify-between gap-2 border-b border-neutral-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 ">
                                 // Hamburger Toggle BTN
                                 <button
-                                    x-bind:class="sidebarToggle ? 'lg:bg-transparent  bg-gray-100 ' : ''"
-                                    class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:h-11 lg:w-11 lg:border  "
+                                    x-bind:class="sidebarToggle ? 'lg:bg-transparent  bg-neutral-100 ' : ''"
+                                    class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-neutral-200 text-neutral-500 lg:h-11 lg:w-11 lg:border  "
                                     x-on:click.stop="sidebarToggle = !sidebarToggle">
                                     <svg
                                         class="hidden fill-current lg:block"
@@ -407,8 +405,8 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                 // Application nav menu button
                                 <button
-                                    class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 lg:hidden  "
-                                    x-bind:class="menuToggle ? 'bg-gray-100 ' : ''"
+                                    class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 lg:hidden  "
+                                    x-bind:class="menuToggle ? 'bg-neutral-100 ' : ''"
                                     x-on:click.stop="menuToggle = !menuToggle">
                                     <svg
                                         class="fill-current"
@@ -430,7 +428,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                         <div class="relative">
                                             <span class="absolute top-1/2 left-4 -translate-y-1/2">
                                                 <svg
-                                                    class="fill-gray-500 "
+                                                    class="fill-neutral-500 "
                                                     "width"="20"
                                                     "height"="20"
                                                     "viewBox"="0 0 20 20"
@@ -446,7 +444,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                                 type="text"
                                                 placeholder="Search or type command..."
                                                 id="search-input"
-                                                class=" shadow-xs focus:border-brand-300 focus:ring-brand-500/10  h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] " />
+                                                class=" shadow-xs focus:border-brand-300 focus:ring-brand-500/10  h-11 w-full rounded-lg border border-neutral-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-neutral-800 placeholder:text-neutral-400 focus:ring-3 focus:outline-hidden xl:w-[430px] " />
                                         </div>
                                     </form>
                                 </div>
@@ -462,7 +460,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                         x-data="{ dropdownOpen: false, notifying: true }"
                                         x-on:click.outside="dropdownOpen = false">
                                         <button
-                                            class="relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                                            class="relative flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
                                             x-on:click.prevent="dropdownOpen = ! dropdownOpen; notifying = false">
                                             <span
                                                 x-bind:class="!notifying ? 'hidden' : 'flex'"
@@ -487,17 +485,17 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                         // Dropdown Start
                                         <div
                                             x-show="dropdownOpen"
-                                            class="shadow-lg  absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 sm:w-[361px] lg:right-0 ">
+                                            class="shadow-lg  absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-neutral-200 bg-white p-3 sm:w-[361px] lg:right-0 ">
                                             <div
-                                                class="mb-3 flex items-center justify-between border-b border-gray-100 pb-3 ">
+                                                class="mb-3 flex items-center justify-between border-b border-neutral-100 pb-3 ">
                                                 <h5
-                                                    class="text-lg font-semibold text-gray-800 ">
+                                                    class="text-lg font-semibold text-neutral-800 ">
                                                     "Notification"
                                                 </h5>
 
                                                 <button
                                                     x-on:click="dropdownOpen = false"
-                                                    class="text-gray-500 ">
+                                                    class="text-neutral-500 ">
                                                     <svg
                                                         class="fill-current"
                                                         "width"="24"
@@ -516,7 +514,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                             <ul class="custom-scrollbar flex h-auto flex-col overflow-y-auto">
                                                 <li>
                                                     <a
-                                                        class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100  "
+                                                        class="flex gap-3 rounded-lg border-b border-neutral-100 p-3 px-4.5 py-3 hover:bg-neutral-100  "
                                                         href="#">
                                                         <span
                                                             class="relative z-1 block h-10 w-full max-w-10 rounded-full">
@@ -530,16 +528,16 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                                         <span class="block">
                                                             <span
-                                                                class="text-sm mb-1.5 block text-gray-500 ">
-                                                                <span class="font-medium text-gray-800 ">"Terry Franci"</span>
+                                                                class="text-sm mb-1.5 block text-neutral-500 ">
+                                                                <span class="font-medium text-neutral-800 ">"Terry Franci"</span>
                                                                 " requests permission to change "
-                                                                <span class="font-medium text-gray-800 ">"Project - Nganter App"</span>
+                                                                <span class="font-medium text-neutral-800 ">"Project - Nganter App"</span>
                                                             </span>
 
                                                             <span
-                                                                class="text-xs flex items-center gap-2 text-gray-500 ">
+                                                                class="text-xs flex items-center gap-2 text-neutral-500 ">
                                                                 <span>"Project"</span>
-                                                                <span class="h-1 w-1 rounded-full bg-gray-400"></span>
+                                                                <span class="h-1 w-1 rounded-full bg-neutral-400"></span>
                                                                 <span>"5 min ago"</span>
                                                             </span>
                                                         </span>
@@ -548,7 +546,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                                 <li>
                                                     <a
-                                                        class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100  "
+                                                        class="flex gap-3 rounded-lg border-b border-neutral-100 p-3 px-4.5 py-3 hover:bg-neutral-100  "
                                                         href="#">
                                                         <span
                                                             class="relative z-1 block h-10 w-full max-w-10 rounded-full">
@@ -562,16 +560,16 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                                         <span class="block">
                                                             <span
-                                                                class="text-sm mb-1.5 block text-gray-500 ">
-                                                                <span class="font-medium text-gray-800 ">"Alena Franci"</span>
+                                                                class="text-sm mb-1.5 block text-neutral-500 ">
+                                                                <span class="font-medium text-neutral-800 ">"Alena Franci"</span>
                                                                 " requests permission to change "
-                                                                <span class="font-medium text-gray-800 ">"Project - Nganter App"</span>
+                                                                <span class="font-medium text-neutral-800 ">"Project - Nganter App"</span>
                                                             </span>
 
                                                             <span
-                                                                class="text-xs flex items-center gap-2 text-gray-500 ">
+                                                                class="text-xs flex items-center gap-2 text-neutral-500 ">
                                                                 <span>"Project"</span>
-                                                                <span class="h-1 w-1 rounded-full bg-gray-400"></span>
+                                                                <span class="h-1 w-1 rounded-full bg-neutral-400"></span>
                                                                 <span>"8 min ago"</span>
                                                             </span>
                                                         </span>
@@ -580,7 +578,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                                 <li>
                                                     <a
-                                                        class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100  "
+                                                        class="flex gap-3 rounded-lg border-b border-neutral-100 p-3 px-4.5 py-3 hover:bg-neutral-100  "
                                                         href="#">
                                                         <span
                                                             class="relative z-1 block h-10 w-full max-w-10 rounded-full">
@@ -594,16 +592,16 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                                         <span class="block">
                                                             <span
-                                                                class="text-sm mb-1.5 block text-gray-500 ">
-                                                                <span class="font-medium text-gray-800 ">"Jocelyn Kenter"</span>
+                                                                class="text-sm mb-1.5 block text-neutral-500 ">
+                                                                <span class="font-medium text-neutral-800 ">"Jocelyn Kenter"</span>
                                                                 " requests permission to change "
-                                                                <span class="font-medium text-gray-800 ">"Project - Nganter App"</span>
+                                                                <span class="font-medium text-neutral-800 ">"Project - Nganter App"</span>
                                                             </span>
 
                                                             <span
-                                                                class="text-xs flex items-center gap-2 text-gray-500 ">
+                                                                class="text-xs flex items-center gap-2 text-neutral-500 ">
                                                                 <span>"Project"</span>
-                                                                <span class="h-1 w-1 rounded-full bg-gray-400"></span>
+                                                                <span class="h-1 w-1 rounded-full bg-neutral-400"></span>
                                                                 <span>"15 min ago"</span>
                                                             </span>
                                                         </span>
@@ -612,7 +610,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                                 <li>
                                                     <a
-                                                        class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100  "
+                                                        class="flex gap-3 rounded-lg border-b border-neutral-100 p-3 px-4.5 py-3 hover:bg-neutral-100  "
                                                         href="#">
                                                         <span
                                                             class="relative z-1 block h-10 w-full max-w-10 rounded-full">
@@ -626,16 +624,16 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                                         <span class="block">
                                                             <span
-                                                                class="text-sm mb-1.5 block text-gray-500 ">
-                                                                <span class="font-medium text-gray-800 ">"Brandon Philips"</span>
+                                                                class="text-sm mb-1.5 block text-neutral-500 ">
+                                                                <span class="font-medium text-neutral-800 ">"Brandon Philips"</span>
                                                                 " requests permission to change "
-                                                                <span class="font-medium text-gray-800 ">"Project - Nganter App"</span>
+                                                                <span class="font-medium text-neutral-800 ">"Project - Nganter App"</span>
                                                             </span>
 
                                                             <span
-                                                                class="text-xs flex items-center gap-2 text-gray-500 ">
+                                                                class="text-xs flex items-center gap-2 text-neutral-500 ">
                                                                 <span>"Project"</span>
-                                                                <span class="h-1 w-1 rounded-full bg-gray-400"></span>
+                                                                <span class="h-1 w-1 rounded-full bg-neutral-400"></span>
                                                                 <span>"1 hr ago"</span>
                                                             </span>
                                                         </span>
@@ -645,7 +643,7 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
 
                                             <a
                                                 href="#"
-                                                class="text-sm shadow-xs mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800     ">
+                                                class="text-sm shadow-xs mt-3 flex justify-center rounded-lg border border-neutral-300 bg-white p-3 font-medium text-neutral-700 hover:bg-neutral-50 hover:text-neutral-800     ">
                                                 "View All Notifications"
                                             </a>
                                         </div>
@@ -657,21 +655,17 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                 // User Area
                                 <div
                                     class="relative"
-                                    x-data=(format!(r#"{{ dropdownOpen: false, profileImage: '{}' }}"#, admin.and_then(|a| a.get("profile_image_url")).unwrap_or(&"".to_string())))
+                                    x-data=(format!(r#"{{ dropdownOpen: false, profileImage: '{:?}' }}"#, ctx.admin.profile_image_url))
                                     x-on:click.outside="dropdownOpen = false">
                                     <a
-                                        class="flex items-center text-gray-700 "
+                                        class="flex items-center text-neutral-700 "
                                         href="#"
                                         x-on:click.prevent="dropdownOpen = ! dropdownOpen">
-                                        <span class="mr-3 h-11 w-11 border border-gray-200 rounded-full">
-                                            @if let Some(admin) = admin {
-                                                @if let Some(url) = admin.get("profile_image_url") {
-                                                    <template x-if="profileImage">
-                                                        <img x-bind:src="profileImage" alt="admin profile image" class="object-cover size-full rounded-full" />
-                                                    </template>
-                                                }
-                                            }
-                                            <template x-if=(if let Some(admin) = admin.and_then(|a| a.get("profile_image_url")) { "!profileImage" } else { "true" })>
+                                        <span class="mr-3 h-11 w-11 border border-neutral-200 rounded-full">
+                                            <template x-if="profileImage">
+                                                <img x-bind:src="profileImage" alt="admin profile image" class="object-cover size-full rounded-full" />
+                                            </template>
+                                            <template x-if="!profileImage">
                                                 <svg class="object-cover size-full rounded-full" "viewBox"="312.81 0 401 401">
                                                     <path "fill"="#e4e6e7" "d"="M268.073-44.735h490.423v490.423H268.073z"></path>
                                                     <path "fill"="#aeb4b7" "d"="M513.81 267.142c-103.361 0-187.754 58.93-192.475 132.842h384.988c-4.733-73.918-89.157-132.842-192.512-132.842m96.605-109.116c0 57.17-42.935 103.516-95.896 103.516s-95.895-46.346-95.895-103.516S461.559 54.51 514.52 54.51c52.968 0 95.896 46.352 95.896 103.515z"></path>
@@ -679,19 +673,13 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                             </template>
                                         </span>
 
-                                        @if let Some(admin) = admin {
-                                            <span class="text-sm mr-1 block font-medium">
-                                                (admin.get("first_name").unwrap_or(&"".to_string()))
-                                                " "
-                                                (admin.get("last_name").unwrap_or(&"".to_string()))
-                                            </span>
-                                        } @else {
-                                            <span class="text-sm mr-1 block font-medium">"Administrator"</span>
-                                        }
+                                        <span class="text-sm mr-1 block font-medium">
+                                            (ctx.admin.first_name)" "(ctx.admin.last_name)
+                                        </span>
 
                                         <svg
                                             x-bind:class="dropdownOpen && 'rotate-180'"
-                                            class="stroke-gray-500 "
+                                            class="stroke-neutral-500 "
                                             "width"="18"
                                             "height"="20"
                                             "viewBox"="0 0 18 20"
@@ -708,35 +696,28 @@ pub fn admin_layout(title: &str, content: impl Renderable, context: &HashMap<Str
                                     // Dropdown Start
                                     <div
                                         x-show="dropdownOpen"
-                                        class="shadow-lg absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 ">
+                                        class="shadow-lg absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-neutral-200 bg-white p-3">
                                         <div>
-                                            @if let Some(admin) = admin {
-                                                <span
-                                                    class="text-sm block font-medium text-gray-700 ">
-                                                    (admin.get("first_name").unwrap_or(&"".to_string()))
-                                                    " "
-                                                    (admin.get("last_name").unwrap_or(&"".to_string()))
-                                                </span>
-                                                <span
-                                                    class="text-xs mt-0.5 block text-gray-500 ">
-                                                    (admin.get("email").unwrap_or(&"".to_string()))
-                                                </span>
-                                            }
+                                            <span class="text-sm block font-medium text-neutral-700">
+                                                (ctx.admin.first_name)" "(ctx.admin.last_name)
+                                            </span>
+                                            <span class="text-xs mt-0.5 block text-neutral-500">
+                                                (ctx.admin.email)
+                                            </span>
                                         </div>
 
-                                        <ul
-                                            class="flex flex-col gap-1 border-b border-gray-200 pt-4 pb-3 ">
+                                        <ul class="flex flex-col gap-1 border-b border-neutral-200 pt-4 pb-3 ">
                                             <li>
-                                                <a href="/admin/edit-account" class="group text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700">
-                                                    <svg class="fill-gray-500 group-hover:fill-gray-700" "fill"="none" "width"="24" "height"="24" "viewBox"="0 0 24 24">
+                                                <a href="/admin/account" class="group text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                                    <svg class="fill-neutral-500 group-hover:fill-neutral-700" "fill"="none" "width"="24" "height"="24" "viewBox"="0 0 24 24">
                                                         <path "fill"="" "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M10.4858 3.5L13.5182 3.5C13.9233 3.5 14.2518 3.82851 14.2518 4.23377C14.2518 5.9529 16.1129 7.02795 17.602 6.1682C17.9528 5.96567 18.4014 6.08586 18.6039 6.43667L20.1203 9.0631C20.3229 9.41407 20.2027 9.86286 19.8517 10.0655C18.3625 10.9253 18.3625 13.0747 19.8517 13.9345C20.2026 14.1372 20.3229 14.5859 20.1203 14.9369L18.6039 17.5634C18.4013 17.9142 17.9528 18.0344 17.602 17.8318C16.1129 16.9721 14.2518 18.0471 14.2518 19.7663C14.2518 20.1715 13.9233 20.5 13.5182 20.5H10.4858C10.0804 20.5 9.75182 20.1714 9.75182 19.766C9.75182 18.0461 7.88983 16.9717 6.40067 17.8314C6.04945 18.0342 5.60037 17.9139 5.39767 17.5628L3.88167 14.937C3.67903 14.586 3.79928 14.1372 4.15026 13.9346C5.63949 13.0748 5.63946 10.9253 4.15025 10.0655C3.79926 9.86282 3.67901 9.41401 3.88165 9.06303L5.39764 6.43725C5.60034 6.08617 6.04943 5.96581 6.40065 6.16858C7.88982 7.02836 9.75182 5.9539 9.75182 4.23399C9.75182 3.82862 10.0804 3.5 10.4858 3.5ZM13.5182 2L10.4858 2C9.25201 2 8.25182 3.00019 8.25182 4.23399C8.25182 4.79884 7.64013 5.15215 7.15065 4.86955C6.08213 4.25263 4.71559 4.61859 4.0986 5.68725L2.58261 8.31303C1.96575 9.38146 2.33183 10.7477 3.40025 11.3645C3.88948 11.647 3.88947 12.3531 3.40026 12.6355C2.33184 13.2524 1.96578 14.6186 2.58263 15.687L4.09863 18.3128C4.71562 19.3814 6.08215 19.7474 7.15067 19.1305C7.64015 18.8479 8.25182 19.2012 8.25182 19.766C8.25182 20.9998 9.25201 22 10.4858 22H13.5182C14.7519 22 15.7518 20.9998 15.7518 19.7663C15.7518 19.2015 16.3632 18.8487 16.852 19.1309C17.9202 19.7476 19.2862 19.3816 19.9029 18.3134L21.4193 15.6869C22.0361 14.6185 21.6701 13.2523 20.6017 12.6355C20.1125 12.3531 20.1125 11.647 20.6017 11.3645C21.6701 10.7477 22.0362 9.38152 21.4193 8.3131L19.903 5.68667C19.2862 4.61842 17.9202 4.25241 16.852 4.86917C16.3632 5.15138 15.7518 4.79856 15.7518 4.23377C15.7518 3.00024 14.7519 2 13.5182 2ZM9.6659 11.9999C9.6659 10.7103 10.7113 9.66493 12.0009 9.66493C13.2905 9.66493 14.3359 10.7103 14.3359 11.9999C14.3359 13.2895 13.2905 14.3349 12.0009 14.3349C10.7113 14.3349 9.6659 13.2895 9.6659 11.9999ZM12.0009 8.16493C9.88289 8.16493 8.1659 9.88191 8.1659 11.9999C8.1659 14.1179 9.88289 15.8349 12.0009 15.8349C14.1189 15.8349 15.8359 14.1179 15.8359 11.9999C15.8359 9.88191 14.1189 8.16493 12.0009 8.16493Z"></path>
                                                     </svg>
                                                     "Account settings"
                                                 </a>
                                             </li>
                                         </ul>
-                                        <a href="/admin/logout" class="group text-sm mt-3 flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700   ">
-                                            <svg "fill"="none" class="fill-gray-500 group-hover:fill-gray-700 " "width"="24" "height"="24" "viewBox"="0 0 24 24">
+                                        <a href="/admin/logout" class="group text-sm mt-3 flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700   ">
+                                            <svg "fill"="none" class="fill-neutral-500 group-hover:fill-neutral-700 " "width"="24" "height"="24" "viewBox"="0 0 24 24">
                                                 <path "fill"="" "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M15.1007 19.247C14.6865 19.247 14.3507 18.9112 14.3507 18.497L14.3507 14.245H12.8507V18.497C12.8507 19.7396 13.8581 20.747 15.1007 20.747H18.5007C19.7434 20.747 20.7507 19.7396 20.7507 18.497L20.7507 5.49609C20.7507 4.25345 19.7433 3.24609 18.5007 3.24609H15.1007C13.8581 3.24609 12.8507 4.25345 12.8507 5.49609V9.74501L14.3507 9.74501V5.49609C14.3507 5.08188 14.6865 4.74609 15.1007 4.74609L18.5007 4.74609C18.9149 4.74609 19.2507 5.08188 19.2507 5.49609L19.2507 18.497C19.2507 18.9112 18.9149 19.247 18.5007 19.247H15.1007ZM3.25073 11.9984C3.25073 12.2144 3.34204 12.4091 3.48817 12.546L8.09483 17.1556C8.38763 17.4485 8.86251 17.4487 9.15549 17.1559C9.44848 16.8631 9.44863 16.3882 9.15583 16.0952L5.81116 12.7484L16.0007 12.7484C16.4149 12.7484 16.7507 12.4127 16.7507 11.9984C16.7507 11.5842 16.4149 11.2484 16.0007 11.2484L5.81528 11.2484L9.15585 7.90554C9.44864 7.61255 9.44847 7.13767 9.15547 6.84488C8.86248 6.55209 8.3876 6.55226 8.09481 6.84525L3.52309 11.4202C3.35673 11.5577 3.25073 11.7657 3.25073 11.7657 11.9984Z"></path>
                                             </svg>
                                             "Logout"

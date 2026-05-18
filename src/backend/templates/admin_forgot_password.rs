@@ -1,15 +1,9 @@
-use crate::server::backend_handlers::Type;
+use crate::server::backend_handlers::{Context, ForgotPasswordPayload};
+use crate::utils::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
-use std::collections::HashMap;
 
-use crate::shared::hypertext_elements;
-
-pub fn admin_forgot_password(context: &HashMap<String, Type>) -> impl Renderable {
-    let payload = if let Some(Type::Map(map)) = context.get("payload") { Some(map) } else { None };
-    let errors = context.get("errors").and_then(|t| if let Type::Map(m) = t { Some(m) } else { None });
-    let success = matches!(context.get("forgot_password_success"), Some(Type::Bool(v)) if *v == true);
-
+pub fn admin_forgot_password_template(ctx: &Context<ForgotPasswordPayload, ()>) -> impl Renderable {
     rsx! {
         // ===== Page Wrapper Start =====
         <div x-data="{ page: 'forgot-password', 'loaded': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
@@ -37,7 +31,7 @@ pub fn admin_forgot_password(context: &HashMap<String, Type>) -> impl Renderable
                             </p>
                         </div>
                         <form action="/admin/forgot-password" method="POST">
-                            <input type="hidden" name="csrf_token" value=(if let Some(Type::Text(v)) = context.get("csrf_token") { v.as_str() } else { "" }) />
+                            <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
                             <div class="space-y-5">
                                 // Email
                                 <div>
@@ -50,11 +44,11 @@ pub fn admin_forgot_password(context: &HashMap<String, Type>) -> impl Renderable
                                         type="email"
                                         id="email"
                                         name="email"
-                                        value=(payload.and_then(|p| p.get("email")))
+                                        value=(ctx.payload.email)
                                         placeholder="johndoe@example.com"
                                         autocomplete="email"
                                         required />
-                                    @if let Some(err) = errors.and_then(|m| m.get("email")) {
+                                    @if let Some(err) = ctx.errors.get("email") {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
                                     }
                                 </div>
@@ -67,10 +61,9 @@ pub fn admin_forgot_password(context: &HashMap<String, Type>) -> impl Renderable
                                 </div>
                             </div>
                         </form>
-                        @if success == true {
-                            <div
-                                class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
-                                "If an account with this email exists, a password reset link will be sent."
+                        @if let Some(message) = ctx.flash_msg.get("forgot_password_success") {
+                            <div class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
+                                (message)
                             </div>
                         }
                     </div>

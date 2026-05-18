@@ -29,6 +29,25 @@ pub enum AdminRole {
 }
 
 impl Admin {
+    pub fn new() -> Self {
+        Admin {
+            id: 0,
+            first_name: String::new(),
+            last_name: String::new(),
+            email: String::new(),
+            password_hash: String::new(),
+            phone: String::new(),
+            profile_image_url: None,
+            role: AdminRole::Admin,
+            is_active: false,
+            last_login: None,
+            created_at: OffsetDateTime::now_utc(),
+            updated_at: OffsetDateTime::now_utc(),
+            reset_token: None,
+            reset_expires_at: None,
+        }
+    }
+
     pub async fn get_by_email(pool: &sqlx::PgPool, email: &str) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
@@ -110,6 +129,21 @@ impl Admin {
         .await
     }
 
+    pub async fn update_reset_token(pool: &sqlx::PgPool, reset_token: &str, email: &str) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"
+            UPDATE admins
+            SET reset_token = $1, reset_expires_at = NOW() + INTERVAL '1 hour'
+            WHERE email = $2
+            "#,
+            reset_token,
+            email
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
     pub async fn clear_reset_token(pool: &sqlx::PgPool, id: &i64) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
@@ -117,6 +151,21 @@ impl Admin {
             SET reset_token = NULL, reset_expires_at = NULL
             WHERE id = $1
             "#,
+            id
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    pub async fn update_password(pool: &sqlx::PgPool, id: &i64, password_hash: &str) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            r#"
+            UPDATE admins
+            SET password_hash = $1, updated_at = NOW()
+            WHERE id = $2
+            "#,
+            password_hash,
             id
         )
         .execute(pool)
@@ -147,20 +196,5 @@ impl Admin {
         )
         .fetch_all(pool)
         .await
-    }
-
-    pub async fn update_password(pool: &sqlx::PgPool, id: &i64, password_hash: &str) -> Result<(), sqlx::Error> {
-        sqlx::query!(
-            r#"
-            UPDATE admins
-            SET password_hash = $1, updated_at = NOW()
-            WHERE id = $2
-            "#,
-            password_hash,
-            id
-        )
-        .execute(pool)
-        .await?;
-        Ok(())
     }
 }

@@ -1,14 +1,9 @@
-use crate::server::backend_handlers::Type;
+use crate::server::backend_handlers::{Context, ResetPasswordPayload};
+use crate::utils::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
-use std::collections::HashMap;
 
-use crate::shared::hypertext_elements;
-
-pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable {
-    let payload = if let Some(Type::Map(map)) = context.get("payload") { Some(map) } else { None };
-    let errors = context.get("errors").and_then(|e| if let Type::Map(map) = e { Some(map) } else { None });
-
+pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) -> impl Renderable {
     rsx! {
         // ===== Page Wrapper Start =====
         <div
@@ -36,7 +31,7 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                             </p>
                         </div>
                         <form action="" method="POST">
-                            <input type="hidden" name="csrf_token" value=(if let Some(Type::Text(v)) = context.get("csrf_token") { v.as_str() } else { "" }) />
+                            <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
                             <div class="space-y-5">
                                 // New Password
                                 <div>
@@ -50,7 +45,7 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                             class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                             id="password"
                                             name="password"
-                                            value=(payload.and_then(|p| p.get("password")))
+                                            value=(ctx.payload.password)
                                             placeholder="Enter new password"
                                             required />
                                         <span
@@ -84,7 +79,7 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                             </svg>
                                         </span>
                                     </div>
-                                    @if let Some(err) = errors.and_then(|m| m.get("password")) {
+                                    @if let Some(err) = ctx.errors.get("password") {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
                                     }
                                 </div>
@@ -100,7 +95,7 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                             class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                             id="confirm_password"
                                             name="confirm_password"
-                                            value=(payload.and_then(|p| p.get("confirm_password")))
+                                            value=(ctx.payload.confirm_password)
                                             placeholder="Confirm new password"
                                             required />
                                         <span
@@ -134,7 +129,7 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                             </svg>
                                         </span>
                                     </div>
-                                    @if let Some(err) = errors.and_then(|m| m.get("confirm_password")) {
+                                    @if let Some(err) = ctx.errors.get("confirm_password") {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
                                     }
                                 </div>
@@ -148,7 +143,7 @@ pub fn admin_reset_password(context: &HashMap<String, Type>) -> impl Renderable 
                                 </div>
                             </div>
                         </form>
-                        @if let Some(err) = errors.and_then(|m| m.get("internal_error")) {
+                        @if let Some(err) = ctx.errors.get("internal_error") {
                             <div class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
                                 (err)
                             </div>

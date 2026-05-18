@@ -1,15 +1,9 @@
-use crate::server::backend_handlers::Type;
+use crate::server::backend_handlers::{Context, LoginPayload};
+use crate::utils::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
-use std::collections::HashMap;
 
-use crate::shared::hypertext_elements;
-
-pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
-    let payload = if let Some(Type::Map(map)) = context.get("payload") { Some(map) } else { None };
-    let errors = if let Some(Type::Map(map)) = context.get("errors") { Some(map) } else { None };
-    let pwd_reset_success = matches!(context.get("password_reset_success"), Some(Type::Bool(v)) if *v == true);
-
+pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable {
     rsx! {
         // ===== Page Wrapper Start =====
         <div
@@ -61,7 +55,7 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                     </div>
                                 </div>
                                 <form action="" method="POST">
-                                    <input type="hidden" name="csrf_token" value=(if let Some(Type::Text(v)) = context.get("csrf_token") { v.as_str() } else { "" }) />
+                                    <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
                                     <div class="space-y-5">
                                         // Email
                                         <div>
@@ -75,11 +69,11 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                                 type="email"
                                                 id="email"
                                                 name="email"
-                                                value=(payload.and_then(|p| p.get("email")).unwrap_or(&"".to_string()))
+                                                value=(ctx.payload.email)
                                                 placeholder="johndoe@example.com"
                                                 autocomplete="email"
                                                 required />
-                                            @if let Some(err) = errors.and_then(|m| m.get("login")) {
+                                            @if let Some(err) = ctx.errors.get("login") {
                                                 <p class="mt-1 text-xs text-red-700">(err)</p>
                                             }
                                         </div>
@@ -164,9 +158,9 @@ pub fn admin_login(context: &HashMap<String, Type>) -> impl Renderable {
                                         </div>
                                     </div>
                                 </form>
-                                @if pwd_reset_success == true {
+                                @if let Some(message) = ctx.flash_msg.get("password_reset_success") {
                                     <div class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
-                                        "Your password has been reset. You can now login."
+                                        (message)
                                     </div>
                                 }
                             </div>

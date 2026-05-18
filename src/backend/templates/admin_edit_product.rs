@@ -3,6 +3,6 @@ use crate::utils::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Renderable, rsx};
 
-pub fn admin_orders_template(context: &Context) -> impl Renderable {
+pub fn admin_edit_product_template(ctx: &Context) -> impl Renderable {
     rsx! {}
 }

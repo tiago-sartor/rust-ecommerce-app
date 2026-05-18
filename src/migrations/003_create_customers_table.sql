@@ -17,3 +17,9 @@ CREATE TABLE IF NOT EXISTS customers (
     reset_token TEXT,
     reset_expires_at TIMESTAMPTZ
 );
+
+-- Indexing for faster lookups
+CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
+CREATE INDEX IF NOT EXISTS idx_customers_cpf ON customers(cpf);
+CREATE INDEX IF NOT EXISTS idx_customers_cnpj ON customers(cnpj);
+CREATE INDEX IF NOT EXISTS idx_customers_reset_token ON customers(reset_token);

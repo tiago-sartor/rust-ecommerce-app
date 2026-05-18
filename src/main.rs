@@ -1,12 +1,12 @@
-use axum::{Router, middleware, routing::get};
+use axum::{Router, middleware};
 use sqlx::PgPool;
 use tokio::{signal, task::AbortHandle};
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, services::ServeDir};
 use tower_sessions::{ExpiredDeletion, Expiry, SessionManagerLayer, cookie::SameSite};
 use tower_sessions_sqlx_store::PostgresStore;
 use tracing_subscriber::fmt::format::FmtSpan;
 
-use rust_ecommerce_app::{middlewares::csrf_middleware::*, server::*};
+use rust_ecommerce_app::{middlewares::csrf::csrf_middleware, server::routes};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -35,21 +35,12 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         // Frontend routes
         .merge(routes::frontend_routes())
-        .nest("/my-account", routes::protected_customer_routes())
+        .merge(routes::protected_customer_routes(pool.clone()))
         // Admin routes
-        .nest("/admin", routes::protected_admin_routes())
-        .route("/admin/login", get(backend_handlers::admin_login_get).post(backend_handlers::admin_login_post))
-        .route("/admin/logout", get(backend_handlers::admin_logout))
-        .route(
-            "/admin/forgot-password",
-            get(backend_handlers::admin_forgot_password_get).post(backend_handlers::admin_forgot_password_post),
-        )
-        .route(
-            "/admin/reset-password/{token}",
-            get(backend_handlers::admin_reset_password_get).post(backend_handlers::admin_reset_password_post),
-        )
+        .merge(routes::admin_routes())
+        .merge(routes::protected_admin_routes(pool.clone()))
         // Static files
-        .nest_service("/public", tower_http::services::ServeDir::new("public"))
+        .nest_service("/public", ServeDir::new("public"))
         // Middlewares
         .layer(middleware::from_fn(csrf_middleware))
         .layer(session_layer)

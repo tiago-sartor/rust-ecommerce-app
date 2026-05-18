@@ -1,6 +1,9 @@
 #[path = "backend/mod.rs"]
 pub mod backend;
 
+#[path = "emails/mod.rs"]
+pub mod emails;
+
 #[path = "frontend/mod.rs"]
 pub mod frontend;
 

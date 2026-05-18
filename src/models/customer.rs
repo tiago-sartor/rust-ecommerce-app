@@ -25,29 +25,7 @@ pub struct Customer {
 }
 
 impl Customer {
-    pub fn hash_password(password: &str) -> String {
-        let salt = SaltString::generate(&mut OsRng);
-        let argon2 = Argon2::default();
-        argon2
-            .hash_password(password.as_bytes(), &salt)
-            .expect("Failed to hash password")
-            .to_string()
-    }
-
-    pub fn verify_password(&self, password: &str) -> bool {
-        let argon2 = Argon2::default();
-        match PasswordHash::new(&self.password_hash) {
-            Ok(parsed_hash) => argon2
-                .verify_password(password.as_bytes(), &parsed_hash)
-                .is_ok(),
-            Err(_) => false,
-        }
-    }
-
-    pub async fn get_by_email(
-        pool: &sqlx::PgPool,
-        email: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn get_by_email(pool: &sqlx::PgPool, email: &str) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
             r#"
@@ -61,7 +39,7 @@ impl Customer {
         .await
     }
 
-    pub async fn get_by_id(pool: &sqlx::PgPool, id: i64) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn get_by_id(pool: &sqlx::PgPool, id: &i64) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
             r#"
@@ -73,56 +51,6 @@ impl Customer {
         )
         .fetch_optional(pool)
         .await
-    }
-}
-
-pub async fn get_customer_by_id(customer_id: i64) -> Option<Customer> {
-    let now = OffsetDateTime::now_utc();
-
-    // Simulate fetching customer from a database
-    Some(Customer {
-        id: customer_id,
-        first_name: "John".to_string(),
-        last_name: "Doe".to_string(),
-        email: "john.doe@example.com".to_string(),
-        password_hash: "hashed_password".to_string(),
-        phone: "1234567890".to_string(),
-        profile_image_url: None,
-        cpf: None,
-        company_name: None,
-        cnpj: None,
-        state_registration: None,
-        is_active: true,
-        last_login: None,
-        created_at: now,
-        updated_at: now,
-    })
-}
-
-pub async fn get_customer_by_email(email: &str) -> Option<Customer> {
-    let now = OffsetDateTime::now_utc();
-
-    // Simulate fetching customer from a database
-    if email == "john.doe@example.com" {
-        Some(Customer {
-            id: 1,
-            first_name: "John".to_string(),
-            last_name: "Doe".to_string(),
-            email: email.to_string(),
-            password_hash: "hashed_password".to_string(),
-            phone: "1234567890".to_string(),
-            profile_image_url: None,
-            cpf: None,
-            company_name: None,
-            cnpj: None,
-            state_registration: None,
-            is_active: true,
-            last_login: None,
-            created_at: now,
-            updated_at: now,
-        })
-    } else {
-        None
     }
 }
 
@@ -185,16 +113,12 @@ pub async fn create_customer(customer: Customer) -> Customer {
     customer
 }
 
-pub async fn update_customer(customer_id: i64, updated_customer: Customer) -> Option<Customer> {
+pub async fn update_customer(customer_id: &i64, updated_customer: Customer) -> Option<Customer> {
     // Simulate updating a customer in a database
-    if customer_id == 1 {
-        Some(updated_customer)
-    } else {
-        None
-    }
+    if *customer_id == 1 { Some(updated_customer) } else { None }
 }
 
-pub async fn delete_customer(customer_id: i64) -> bool {
+pub async fn delete_customer(customer_id: &i64) -> bool {
     // Simulate deleting a customer from a database
-    customer_id == 1
+    *customer_id == 1
 }

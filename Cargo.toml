@@ -4,36 +4,59 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# Core / Runtime
 tokio = { version = "1", features = ["full"] }
+
+# Web Framework & Middleware
 axum = { version = "0.8" }
 axum-extra = { version = "0.12", features = ["cookie"] }
 tower-http = { version = "0.6", features = ["cors", "fs"] }
-tower-sessions = { version = "0.14" }
-tower-sessions-sqlx-store = { version = "0.15", features = ["postgres"] }
+hypertext = { version = "0.12", features = ["alpine", "axum"] }
+
+# Database & Sessions
 sqlx = { version = "0.8", features = [
-    "runtime-tokio-rustls",
+    "runtime-tokio",
+    "tls-rustls",
     "macros",
+    "migrate",
     "postgres",
     "uuid",
     "time",
 ] }
-uuid = { version = "1", features = ["v4"] }
-time = { version = "0.3", features = [
-    "serde",
-    "macros",
-    "formatting",
-    "parsing",
-    "local-offset",
-] }
+tower-sessions = { version = "0.14" }
+tower-sessions-sqlx-store = { version = "0.15", features = ["postgres"] }
+
+# Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_urlencoded = "0.7"
+
+# Security & Validation
+argon2 = "0.5"
+rand = "0.10"
+validator = { version = "0.20", features = ["derive"] }
+
+# Error Handling
+anyhow = "1"
+thiserror = "2"
+
+# Observability
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-hypertext = { version = "0.12", features = ["alpine", "axum"] }
+
+# Utilities
 dotenvy = "0.15"
-argon2 = "0.5"
-validator = { version = "0.20", features = ["derive"] }
-rand = "0.10"
-thiserror = "2"
-anyhow = "1"
+lettre = { version = "0.11", features = [
+    "tokio1",
+    "tokio1-native-tls",
+    "smtp-transport",
+    "builder",
+    "serde",
+] }
+time = { version = "0.3", features = [
+    "macros",
+    "formatting",
+    "parsing",
+    "serde",
+] }
+uuid = { version = "1", features = ["v4"] }
