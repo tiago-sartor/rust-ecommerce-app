@@ -1,6 +1,5 @@
 use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::prelude::*;
 
 pub fn password_reset_email(reset_link: &str) -> impl Renderable + '_ {
     rsx! {
@@ -11,7 +10,7 @@ pub fn password_reset_email(reset_link: &str) -> impl Renderable + '_ {
             <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
             <title>"Password Reset"</title>
             <style>
-                ".body { width: 100%; height: 100%; padding: 40px 0; font-family: sans-serif; line-height: 1.5; color: #333; background-color: #f6f6f6; }"
+                ".body { width: 100%; height: 100%; margin: 0; padding: 40px 0; font-family: sans-serif; line-height: 1.5; color: #333; background-color: #f6f6f6; }"
                 ".container { max-width: 600px; margin: 0 auto; background-color: #fff; border-radius: 10px; }"
                 ".header { padding: 30px 40px 20px 40px; text-align: center; }"
                 ".content { padding: 20px 40px; font-size: 14px; }"

@@ -24,7 +24,7 @@ export default function search() {
             if (!response.ok) throw new Error(`Request failed. Status code: ${response.status}`);
 
             const data = await response.json();
-            if (!data) throw new Error('Failed to fetch products.');
+            if (!data) throw new Error('Response is not valid JSON.');
 
             this.searchTerm = userInput;
             this.results = data;

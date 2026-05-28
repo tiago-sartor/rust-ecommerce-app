@@ -1,7 +1,7 @@
-use crate::server::backend_handlers::{Context, LoginPayload};
+use crate::utils::context::Context;
+use crate::server::handlers::backend::auth::LoginPayload;
 use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::prelude::*;
 
 pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable {
     rsx! {

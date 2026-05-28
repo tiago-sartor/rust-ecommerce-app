@@ -1,7 +1,6 @@
-use crate::server::backend_handlers::Context;
+use crate::utils::context::Context;
 use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::prelude::*;
 
 pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P, D>) -> impl Renderable {
     let full_title = format!("{title} | Rust Ecommerce App");
@@ -18,11 +17,11 @@ pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
             // Title
             <title>(full_title)</title>
             // Favicon
-            <link href="/public/favicon.webp" rel="icon" type="image/webp">
+            <link href="/assets/favicon.webp" rel="icon" type="image/webp">
             // CSS
-            <link href="/public/css/admin.css" rel="stylesheet" type="text/css">
+            <link href="/assets/css/admin.css" rel="stylesheet" type="text/css">
             // AlpineJS
-            <script defer src="/public/js/app.js"></script>
+            <script defer src="/assets/js/app.js"></script>
         </head>
 
         <body>

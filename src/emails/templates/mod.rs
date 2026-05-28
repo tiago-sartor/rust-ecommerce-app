@@ -1,2 +1,3 @@
-pub mod password_reset;
-pub mod welcome;
+pub mod admin;
+pub mod customer;
+pub mod shared;

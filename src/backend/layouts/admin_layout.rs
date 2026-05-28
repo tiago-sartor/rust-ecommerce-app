@@ -1,7 +1,7 @@
-use crate::server::backend_handlers::Context;
+use crate::server::handlers::backend::*;
+use crate::utils::context::Context;
 use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::prelude::*;
 
 pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P, D>) -> impl Renderable {
     let full_title = format!("{} | Admin Dashboard", title);
@@ -18,23 +18,19 @@ pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
             // Title
             <title>(full_title)</title>
             // Favicon
-            <link href="/public/favicon.webp" rel="icon" type="image/webp">
+            <link href="/assets/favicon.webp" rel="icon" type="image/webp">
             // CSS
-            <link href="/public/css/admin.css" rel="stylesheet" type="text/css">
+            <link href="/assets/css/admin.css" rel="stylesheet" type="text/css">
             // AlpineJS
-            <script defer src="/public/js/app.js"></script>
+            <script defer src="/assets/js/app.js"></script>
         </head>
 
         <body x-data="{ page: 'dashboard', 'loading': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }">
 
-            // ===== Preloader Start =====
-            <div
-                x-show="loading"
-                x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loading = false, 500)})"
-                class="fixed left-0 top-0 z-999999 flex h-screen w-screen items-center justify-center bg-white">
-                <div class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-indigo-500 border-t-transparent"></div>
+            // ===== Loading Indicator =====
+            <div x-show="loading" class="absolute inset-0 z-999999 flex items-center justify-center bg-white" x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loading = false, 500)})">
+                <div class="size-16 animate-spin border-4 border-indigo-500 border-t-transparent rounded-full"></div>
             </div>
-            // ===== Preloader End =====
 
             // ===== Page Wrapper Start =====
             <div class="flex h-screen overflow-hidden">
@@ -149,16 +145,16 @@ pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
                                             class="flex flex-col gap-1 mt-2 pl-9"
                                             x-bind:class="sidebarToggle ? 'lg:hidden' : 'flex'">
                                             <li>
-                                                <a href="#"
+                                                <a href="/admin/customers"
                                                     class="menu-dropdown-item group"
-                                                    x-bind:class="(page === 'list-customers') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'customers') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "View customers"
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#"
+                                                <a href="/admin/add-customer"
                                                     class="menu-dropdown-item group"
-                                                    x-bind:class="(page === 'create-customer') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                    x-bind:class="(page === 'add-customer') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                     "Add new customer"
                                                 </a>
                                             </li>
@@ -732,7 +728,7 @@ pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
                     // ===== Header End =====
 
                     // ===== Main Content Start =====
-                    <main>
+                    <main class="relative size-full">
                         (content)
                     </main>
                     // ===== Main Content End =====

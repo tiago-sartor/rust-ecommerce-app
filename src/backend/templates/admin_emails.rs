@@ -1,23 +1,24 @@
-use crate::emails::mailer::EmailLog;
-use crate::server::backend_handlers::Context;
+use crate::emails::mailer::{EmailLog, Status};
+use crate::utils::context::Context;
 use crate::utils::helpers;
 use crate::utils::hypertext_elements;
 use hypertext::validation::attributes::*;
 use hypertext::{Raw, Renderable, rsx};
 
-pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) -> impl Renderable {
-    let (logs, count, page, limit) = &ctx.data;
+pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64, Option<Status>)>) -> impl Renderable {
+    let (logs, count, page, limit, filter_by_opt) = &ctx.data;
+    let filter_by = filter_by_opt.as_ref().map(|s| s.to_string()).unwrap_or("all".to_string());
 
     let showing_from = (page - 1) * limit + 1;
     let showing_to = i64::min(page * limit, *count);
     let total_pages = (*count as f64 / *limit as f64).ceil() as i64;
 
     let all_ids: Vec<i64> = logs.iter().map(|l| l.id).collect();
-    let all_ids_json = serde_json::to_string(&all_ids).unwrap_or_else(|_| "[]".to_string());
+    let all_ids_json = serde_json::to_string(&all_ids).unwrap_or("[]".to_string());
 
     rsx! {
-        <div class="mx-auto max-w-(--breakpoint-2xl) px-5 py-4 md:p-6">
-            <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-white/[0.03]">
+        <div x-data=(format!("checkboxes({all_ids_json})")) class="mx-auto max-w-(--breakpoint-2xl) px-5 py-4 md:p-6">
+            <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-white/3">
                 <div class="flex flex-col justify-between gap-5 border-b border-neutral-200 px-5 py-4 sm:flex-row sm:items-center dark:border-neutral-800">
                     <div>
                         <h3 class="text-lg font-semibold text-neutral-800 dark:text-white/90">
@@ -47,17 +48,18 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                                     <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="m19.5 8.25-7.5 7.5-7.5-7.5"></path>
                                 </svg>
                             </button>
-                            <div x-show="showBulkActions" x-on:click.away="showBulkActions = false"
-                                class="absolute left-0 z-10 mt-2 w-42 rounded-lg border border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
-                                style="display: none;">
-                                <ul class="flex flex-col gap-1">
-                                    <li class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
-                                        <span>"Resend selected"</span>
-                                    </li>
-                                    <li class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
-                                        <span>"Delete selected"</span>
-                                    </li>
-                                </ul>
+                            <div x-cloak x-show="showBulkActions" x-on:click.away="showBulkActions = false"
+                                class="absolute left-0 z-10 mt-2 w-42 rounded-lg border border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
+                                <form method="POST" action="/admin/emails/bulk-actions">
+                                    <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
+                                    <input type="hidden" name="ids" x-bind:value="JSON.stringify(selected)" />
+                                    <button type="submit" name="action" value="resend" class="text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                        "Resend selected"
+                                    </button>
+                                    <button type="submit" name="action" value="delete" class="text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                        "Delete selected"
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         <div class="flex-col gap-3 sm:flex sm:flex-row sm:items-center">
@@ -70,20 +72,16 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                                     </svg>
                                     "Filter"
                                 </button>
-                                <div x-show="showFilter" x-on:click.away="showFilter = false"
-                                    class="absolute right-0 z-10 mt-2 w-40 rounded-lg border border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
-                                    style="display: none;">
-                                    <ul class="flex flex-col gap-1">
-                                        <li class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
-                                            <span>"All"</span>
-                                        </li>
-                                        <li class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
-                                            <span>"Sent"</span>
-                                        </li>
-                                        <li class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
-                                            <span>"Failed"</span>
-                                        </li>
-                                    </ul>
+                                <div x-cloak x-show="showFilter" x-on:click.away="showFilter = false" class="absolute flex flex-col gap-1 right-0 z-10 mt-2 w-40 rounded-lg border border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
+                                    <a href="/admin/emails?filter_by=all" class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                        "All"
+                                    </a>
+                                    <a href=(format!("/admin/emails?filter_by={}", Status::Sent.to_string().to_lowercase())) class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                        "Sent"
+                                    </a>
+                                    <a href=(format!("/admin/emails?filter_by={}", Status::Failed.to_string().to_lowercase())) class="cursor-pointer text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                        "Failed"
+                                    </a>
                                 </div>
                             </div>
                             <button class="shadow-xs flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-[11px] text-sm font-medium text-neutral-700 sm:w-auto dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
@@ -96,8 +94,8 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                     </div>
                 </div>
                 // Table
-                <div class="custom-scrollbar overflow-x-auto">
-                    <table x-data=(format!("selectAll({})", all_ids_json)) class="w-full table-auto">
+                <div x-data="details()" class="custom-scrollbar overflow-x-auto">
+                    <table class="w-full table-auto">
                         <thead>
                             <tr class="border-b border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800 text-xs font-bold text-neutral-600 dark:text-neutral-400">
                                 <th class="w-14 px-5 py-4 text-left">
@@ -163,13 +161,13 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                                     </td>
 
                                     <td class="px-5 py-4 whitespace-nowrap">
-                                        @if log.status == "sent" {
+                                        @if log.status == Status::Sent {
                                             <span class="text-xs rounded-full px-2 py-0.5 font-medium bg-green-50 dark:bg-green-500/15 text-green-700 dark:text-green-500">
-                                                (log.status)
+                                                "Sent"
                                             </span>
                                         } @else {
                                             <span class="text-xs rounded-full px-2 py-0.5 font-medium bg-red-50 dark:bg-red-500/15 text-red-700 dark:text-red-500">
-                                                (log.status)
+                                                "Failed"
                                             </span>
                                         }
                                     </td>
@@ -179,22 +177,30 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                                         </p>
                                     </td>
                                     <td class="px-5 py-4 whitespace-nowrap">
-                                        <div x-data="actionDropdown()" class="relative flex justify-center">
+                                        <div x-data="actionDropdown()"  class="relative flex justify-center">
                                             <button x-on:click="toggle()" class="text-neutral-500 dark:text-neutral-400">
                                                 <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                                                     <path "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M5.99902 10.245C6.96552 10.245 7.74902 11.0285 7.74902 11.995V12.005C7.74902 12.9715 6.96552 13.755 5.99902 13.755C5.03253 13.755 4.24902 12.9715 4.24902 12.005V11.995C4.24902 11.0285 5.03253 10.245 5.99902 10.245ZM17.999 10.245C18.9655 10.245 19.749 11.0285 19.749 11.995V12.005C19.749 12.9715 18.9655 13.755 17.999 13.755C17.0325 13.755 16.249 12.9715 16.249 12.005V11.995C16.249 11.0285 17.0325 10.245 17.999 10.245ZM13.749 11.995C13.749 11.0285 12.9655 10.245 11.999 10.245C11.0325 10.245 10.249 11.0285 10.249 11.995V12.005C10.249 12.9715 11.0325 13.755 11.999 13.755C12.9655 13.755 13.749 12.9715 13.749 12.005V11.995Z" "fill"=""></path>
                                                 </svg>
                                             </button>
-                                            <div x-ref="dropdown" x-show="open" x-on:click.outside="open = false" class="fixed z-10 w-40 rounded-lg border border-neutral-200 bg-white p-2 shadow-lg dark:border-neutral-700 dark:bg-neutral-800" style="display: none;">
-                                                <button class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
-                                                    "Details"
-                                                </button>
-                                                <button class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
-                                                    "Resend"
-                                                </button>
-                                                <button class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
-                                                    "Delete"
-                                                </button>
+                                            <div x-cloak x-show="open" x-on:click.outside="open = false" x-ref="dropdown" class="fixed z-10 w-40 rounded-lg border border-neutral-200 bg-white p-2 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
+                                                <form method="GET" action=(format!("/admin/emails/{}/details", log.id))>
+                                                    <button x-on:click.prevent=(format!("fetchDetails({})", log.id)) class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
+                                                        "Details"
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action=(format!("/admin/emails/{}/resend", log.id))>
+                                                    <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
+                                                    <button class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
+                                                        "Resend"
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action=(format!("/admin/emails/{}/delete", log.id))>
+                                                    <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
+                                                    <button class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
+                                                        "Delete"
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
                                     </td>
@@ -202,6 +208,34 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                             }
                         </tbody>
                     </table>
+                    // ===== Start Details Modal =====
+                    <div x-data="{open: false}" x-on:keyup.escape.window="openDetailsModal = false">
+                        // Background Overlay
+                        <div x-cloak x-show="openDetailsModal" "x-transition.opacity.duration.500ms" class="fixed inset-0 flex items-center justify-center p-4 pt-22 md:p-6 md:pt-25 bg-black/75 backdrop-blur-[2px] z-999" aria-hidden="true">
+                            // Modal Container
+                            <div x-on:click.outside="openDetailsModal = false" "x-transition.opacity.duration.500ms" class="relative w-full max-w-5xl max-h-full flex flex-col p-5 md:p-6 rounded-lg text-gray-800 bg-white shadow-2xl z-1000 overflow-y-auto">
+                                // Loading Indicator
+                                <div x-show="loading" class="absolute inset-0 z-1001 flex items-center justify-center bg-white">
+                                    <div class="size-16 animate-spin border-4 border-indigo-500 border-t-transparent rounded-full"></div>
+                                </div>
+                                // Close Button
+                                <div class="flex items-center justify-end mb-4">
+                                    <button x-on:click="openDetailsModal = false" class="relative flex items-center justify-center text-gray-400 hover:text-gray-600" type="button" aria-label="Close details">
+                                        <svg class="size-6.5" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.25" "stroke"="currentColor" aria-hidden="true">
+                                            <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M6 18 18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                // Details Content
+                                <iframe x-bind:srcdoc="html_body" class="w-full h-120 border-none rounded-md overflow-y-auto" allow="fullscreen *"></iframe>
+                                <div class="mt-4 text-sm">
+                                    <div class="mb-2 font-semibold">"Server response:"</div>
+                                    <pre class="max-h-52 p-4 text-neutral-400 bg-neutral-800 rounded-md overflow-auto"><code class="block" x-text="server_response"></code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    // ===== End Details Modal =====
                 </div>
                 <div
                     class="flex flex-col items-center justify-between border-t border-neutral-200 px-5 py-4 sm:flex-row dark:border-neutral-800">
@@ -215,19 +249,19 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                             <span class="text-neutral-800 dark:text-white/90">(count)</span>
                         </span>
                     </div>
-                    <div
-                        class="flex w-full items-center justify-between gap-2 rounded-lg bg-neutral-50 p-4 sm:w-auto sm:justify-normal sm:rounded-none sm:bg-transparent sm:p-0 dark:bg-neutral-900 dark:sm:bg-transparent">
-                        <button
-                            class="shadow-xs flex items-center gap-2 rounded-lg border border-neutral-300 bg-white p-2 text-neutral-700 hover:bg-neutral-50 hover:text-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-white/[0.03] dark:hover:text-neutral-200"
-                            disabled="disabled">
-                            <span>
-                                <svg
-                                    class="fill-current" "width"="20" "height"="20" "viewBox"="0 0 20 20" "fill"="none">
-                                    <path "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M2.58203 9.99868C2.58174 10.1909 2.6549 10.3833 2.80152 10.53L7.79818 15.5301C8.09097 15.8231 8.56584 15.8233 8.85883 15.5305C9.15183 15.2377 9.152 14.7629 8.85921 14.4699L5.13911 10.7472L16.6665 10.7472C17.0807 10.7472 17.4165 10.4114 17.4165 9.99715C17.4165 9.58294 17.0807 9.24715 16.6665 9.24715L5.14456 9.24715L8.85919 5.53016C9.15199 5.23717 9.15184 4.7623 8.85885 4.4695C8.56587 4.1767 8.09099 4.17685 7.79819 4.46984L2.84069 9.43049C2.68224 9.568 2.58203 9.77087 2.58203 9.99715C2.58203 9.99766 2.58203 9.99817 2.58203 9.99868Z">
-                                    </path>
-                                </svg>
-                            </span>
-                        </button>
+                    <div class="flex w-full items-center justify-between gap-2 rounded-lg bg-neutral-50 p-4 sm:w-auto sm:justify-normal sm:rounded-none sm:bg-transparent sm:p-0 dark:bg-neutral-900 dark:sm:bg-transparent">
+                        <a
+                            x-bind:href=(if *page > 1 { let p = *page - 1; format!("true ? '/admin/emails?page={p}&limit={limit}&filter_by={filter_by}' : ''") } else { "false".to_string() })
+                            class="
+                                shadow-xs flex items-center gap-2 rounded-lg border p-2 text-neutral-700 sm:p-2.5 border-neutral-300 bg-white hover:bg-neutral-50 hover:text-neutral-800
+                                dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-white/3 dark:hover:text-neutral-200
+                            "
+                            x-bind:class=(if *page == 1 { "true ? 'cursor-not-allowed opacity-50 pointer-events-none' : ''" } else { "false" })
+                            role="button">
+                            <svg class="fill-current" "width"="20" "height"="20" "viewBox"="0 0 20 20" "fill"="none">
+                                <path "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M2.58203 9.99868C2.58174 10.1909 2.6549 10.3833 2.80152 10.53L7.79818 15.5301C8.09097 15.8231 8.56584 15.8233 8.85883 15.5305C9.15183 15.2377 9.152 14.7629 8.85921 14.4699L5.13911 10.7472L16.6665 10.7472C17.0807 10.7472 17.4165 10.4114 17.4165 9.99715C17.4165 9.58294 17.0807 9.24715 16.6665 9.24715L5.14456 9.24715L8.85919 5.53016C9.15199 5.23717 9.15184 4.7623 8.85885 4.4695C8.56587 4.1767 8.09099 4.17685 7.79819 4.46984L2.84069 9.43049C2.68224 9.568 2.58203 9.77087 2.58203 9.99715C2.58203 9.99766 2.58203 9.99817 2.58203 9.99868Z"></path>
+                            </svg>
+                        </a>
 
                         <span class="block text-sm font-medium text-neutral-700 sm:hidden dark:text-neutral-400">
                             "Page "
@@ -244,7 +278,7 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                                         <span>(i)</span>
                                     </a>
                                 } @else {
-                                    <a href=(format!("/admin/emails?page={i}&limit={limit}")) class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium hover:bg-indigo-500 text-neutral-700 dark:text-neutral-400 hover:text-white dark:hover:text-white">
+                                    <a href=(format!("/admin/emails?page={i}&limit={limit}&filter_by={filter_by}")) class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium hover:bg-indigo-500 text-neutral-700 dark:text-neutral-400 hover:text-white dark:hover:text-white">
                                         <span>(i)</span>
                                     </a>
                                 }
@@ -252,25 +286,27 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                             }
                         </ul>
 
-                        <button
-                            x-bind:disabled="false"
-                            class="shadow-xs flex items-center gap-2 rounded-lg border border-neutral-300 bg-white p-2 text-neutral-700 hover:bg-neutral-50 hover:text-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-white/[0.03] dark:hover:text-neutral-200">
-                            <span>
-                                <svg
-                                    class="fill-current" "width"="20" "height"="20" "viewBox"="0 0 20 20" "fill"="none">
-                                    <path "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M17.4165 9.9986C17.4168 10.1909 17.3437 10.3832 17.197 10.53L12.2004 15.5301C11.9076 15.8231 11.4327 15.8233 11.1397 15.5305C10.8467 15.2377 10.8465 14.7629 11.1393 14.4699L14.8594 10.7472L3.33203 10.7472C2.91782 10.7472 2.58203 10.4114 2.58203 9.99715C2.58203 9.58294 2.91782 9.24715 3.33203 9.24715L14.854 9.24715L11.1393 5.53016C10.8465 5.23717 10.8467 4.7623 11.1397 4.4695C11.4327 4.1767 11.9075 4.17685 12.2003 4.46984L17.1578 9.43049C17.3163 9.568 17.4165 9.77087 17.4165 9.99715C17.4165 9.99763 17.4165 9.99812 17.4165 9.9986Z">
-                                    </path>
-                                </svg>
-                            </span>
-                        </button>
+                        <a
+                            x-bind:href=(if *page < total_pages { let p = *page + 1; format!("true ? '/admin/emails?page={p}&limit={limit}&filter_by={filter_by}' : ''") } else { "false".to_string() })
+                            class="
+                                shadow-xs flex items-center gap-2 rounded-lg border border-neutral-300 bg-white p-2 text-neutral-700 hover:bg-neutral-50 hover:text-neutral-800 sm:p-2.5
+                                dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-white/3 dark:hover:text-neutral-200
+                            "
+                            x-bind:class=(if *page == total_pages { "true ? 'cursor-not-allowed opacity-50' : ''" } else { "false" })
+                            role="button">
+                            <svg class="fill-current" "width"="20" "height"="20" "viewBox"="0 0 20 20" "fill"="none">
+                                <path "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M17.4165 9.9986C17.4168 10.1909 17.3437 10.3832 17.197 10.53L12.2004 15.5301C11.9076 15.8231 11.4327 15.8233 11.1397 15.5305C10.8467 15.2377 10.8465 14.7629 11.1393 14.4699L14.8594 10.7472L3.33203 10.7472C2.91782 10.7472 2.58203 10.4114 2.58203 9.99715C2.58203 9.58294 2.91782 9.24715 3.33203 9.24715L14.854 9.24715L11.1393 5.53016C10.8465 5.23717 10.8467 4.7623 11.1397 4.4695C11.4327 4.1767 11.9075 4.17685 12.2003 4.46984L17.1578 9.43049C17.3163 9.568 17.4165 9.77087 17.4165 9.99715C17.4165 9.99763 17.4165 9.99812 17.4165 9.9986Z"></path>
+                            </svg>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
         <script>
+            // XSS SAFETY: This is a statically typed string.
             (Raw::dangerously_create(r#"
-                function selectAll(ids) {
+                function checkboxes(ids) {
                     return {
                         selected: [],
                         allIds: ids,
@@ -314,6 +350,37 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64)>) 
                             });
                         }
                     }                
+                }
+
+                function details() {
+                    return {
+                            html_body: "",
+                            server_response: "",
+                            openDetailsModal: false,
+                            loading: false,
+
+                            async fetchDetails(id) {
+                                const url = `/admin/emails/${id}/details`;
+
+                                this.openDetailsModal = true;
+                                this.loading = true;
+
+                                try {
+                                    const response = await fetch(url);
+                                    if (!response.ok) throw new Error(`Request failed. Status code: ${response.status}`);
+
+                                    const data = await response.json();
+                                    if (!data) throw new Error('Response is not valid JSON.');
+
+                                    this.html_body = data.html;
+                                    this.server_response = JSON.stringify(data.response, null, 3);
+                                } catch (error) {
+                                    console.error('Error fetching log details: ', error);
+                                } finally {
+                                    this.loading = false;
+                                }
+                            }
+                    }
                 }
             "#))
         </script>

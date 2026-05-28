@@ -1,7 +1,7 @@
-use crate::server::backend_handlers::{Context, ForgotPasswordPayload};
+use crate::utils::context::Context;
+use crate::server::handlers::backend::auth::ForgotPasswordPayload;
 use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::prelude::*;
 
 pub fn admin_forgot_password_template(ctx: &Context<ForgotPasswordPayload, ()>) -> impl Renderable {
     rsx! {

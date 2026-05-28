@@ -1,8 +1,8 @@
-use crate::server::backend_handlers::Context;
-use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use crate::server::handlers::backend::*;
+use crate::utils::context::Context;
 use crate::utils::helpers;
+use crate::utils::hypertext_elements;
+use hypertext::prelude::*;
 
 pub fn admin_account_template(ctx: &Context) -> impl Renderable {
     let last_login = ctx.admin.last_login.map(helpers::format_datetime_to_br).unwrap_or_default();

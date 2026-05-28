@@ -1,7 +1,7 @@
-use crate::server::backend_handlers::{Context, ResetPasswordPayload};
+use crate::utils::context::Context;
+use crate::server::handlers::backend::auth::ResetPasswordPayload;
 use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
+use hypertext::prelude::*;
 
 pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) -> impl Renderable {
     rsx! {

@@ -11,7 +11,7 @@ use tower_sessions::Session;
 
 pub async fn admin_auth(State(pool): State<PgPool>, session: Session, mut request: Request, next: Next) -> Result<Response, AppError> {
     if let Some(id) = session.get("admin_id").await? {
-        if let Some(admin) = Admin::get_by_id(&pool, &id).await? {
+        if let Some(admin) = Admin::get_by_id(&id, &pool).await? {
             request.extensions_mut().insert(admin);
 
             return Ok(next.run(request).await);
@@ -23,7 +23,7 @@ pub async fn admin_auth(State(pool): State<PgPool>, session: Session, mut reques
 
 pub async fn customer_auth(State(pool): State<PgPool>, session: Session, mut request: Request, next: Next) -> Result<Response, AppError> {
     if let Some(id) = session.get("customer_id").await? {
-        if let Some(customer) = Customer::get_by_id(&pool, &id).await? {
+        if let Some(customer) = Customer::get_by_id(&id, &pool).await? {
             request.extensions_mut().insert(customer);
 
             return Ok(next.run(request).await);

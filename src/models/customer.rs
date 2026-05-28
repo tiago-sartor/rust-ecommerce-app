@@ -1,7 +1,3 @@
-use argon2::{
-    Argon2,
-    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
-};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
@@ -25,7 +21,7 @@ pub struct Customer {
 }
 
 impl Customer {
-    pub async fn get_by_email(pool: &sqlx::PgPool, email: &str) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn get_by_email(email: &str, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
             r#"
@@ -39,7 +35,7 @@ impl Customer {
         .await
     }
 
-    pub async fn get_by_id(pool: &sqlx::PgPool, id: &i64) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn get_by_id(id: &i64, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
             r#"

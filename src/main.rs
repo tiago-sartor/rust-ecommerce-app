@@ -40,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
         .merge(routes::admin_routes())
         .merge(routes::protected_admin_routes(pool.clone()))
         // Static files
-        .nest_service("/public", ServeDir::new("public"))
+        .nest_service("/assets", ServeDir::new("public"))
         // Middlewares
         .layer(middleware::from_fn(csrf_middleware))
         .layer(session_layer)

@@ -1,9 +1,7 @@
-use crate::server::backend_handlers::Type;
+use crate::utils::context::Context;
 use crate::utils::hypertext_elements;
-use hypertext::validation::attributes::*;
-use hypertext::{Renderable, rsx};
-use std::collections::HashMap;
+use hypertext::prelude::*;
 
-pub fn admin_customers_template(context: &HashMap<String, Type>) -> impl Renderable {
+pub fn admin_customers_template(ctx: &Context) -> impl Renderable {
     rsx! {}
 }

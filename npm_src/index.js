@@ -16,6 +16,15 @@ Alpine.data('search', search);
 import countdown from './modules/countdown.js';
 Alpine.data('countdown', countdown);
 
+// Form Field Validation
+import formFieldValidation from './modules/field-validation.js';
+Alpine.data('formFieldValidation', formFieldValidation);
+
+// CPF/CNPJ module
+import CPFandCNPJvalidation from './modules/cpf-cnpj.js';
+Alpine.data('CPFandCNPJvalidation', CPFandCNPJvalidation);
+
+
 // Register Alpine Plugins
 Alpine.plugin(collapse);
 Alpine.plugin(intersect);
