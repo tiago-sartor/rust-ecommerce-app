@@ -2,8 +2,26 @@
 
 export default function CPFandCNPJvalidation() {
     return {
-        isValid_cpf_cnpj: false,
-        error_cpf_cnpj: '',
+
+        init() {
+            this.$watch('cpf_cnpj', value => this.toggleCnpjFields(value));
+            // Initialize state
+            this.toggleCnpjFields(this.cpf_cnpj);
+        },
+
+        toggleCnpjFields(value) {
+            const isCnpj = (value || '').length > 14;
+            const fields = ['state_registration', 'company_name'];
+
+            fields.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    const container = input.closest('.grid > div');
+                    if (container) container.style.display = isCnpj ? 'block' : 'none';
+                    input.required = isCnpj;
+                }
+            });
+        },
 
         validateCPForCNPJ(input) {
             // Clean the input sequence and remove formatting, allowing only alphanumeric characters.
@@ -11,18 +29,16 @@ export default function CPFandCNPJvalidation() {
 
             // Check if the sequence consists of the same character (e.g., '00...0', 'AA...A').
             if (/^([A-Z0-9])\1+$/.test(sanitizedInput)) {
-                this.setErrorInvalid("CPF/CNPJ");
-                return;
+                return false;
             }
 
             // Check length and structure (11 digits for CPF or 12 alphanumeric chars + 2 digits for CNPJ).
             if (sanitizedInput.length === 11 && /^[0-9]{11}$/.test(sanitizedInput)) {
-                this.validateCPF(sanitizedInput);
+                return this.validateCPF(sanitizedInput);
             } else if (sanitizedInput.length === 14 && /^[A-Z0-9]{12}[0-9]{2}$/.test(sanitizedInput)) {
-                this.validateCNPJ(sanitizedInput);
+                return this.validateCNPJ(sanitizedInput);
             } else {
-                this.setErrorInvalid("CPF/CNPJ");
-                return;
+                return false;
             }
         },
 
@@ -42,31 +58,27 @@ export default function CPFandCNPJvalidation() {
             // Calculate first check digit (for positions 1..9)
             const firstDigit = weightedSum(cpf.substring(0, 9), 10);
             if (firstDigit !== Number(cpf.charAt(9))) {
-                this.setErrorInvalid("CPF");
-                return;
+                return false;
             }
 
             // Calculate second check digit (for positions 1..10)
             const secondDigit = weightedSum(cpf.substring(0, 10), 11);
             if (secondDigit !== Number(cpf.charAt(10))) {
-                this.setErrorInvalid("CPF");
-                return;
+                return false;
             }
 
-            this.setSuccess();
-            return;
+            return true;
         },
 
         validateCNPJ(cnpj) {
             const base = cnpj.substring(0, 12);
 
             // Weighted sum helper: receives a string slice and an array of weights to calculate a check digit.
-            const weightedSum = (str, weights) => {
+            const weightedSum = (cnpjSlice, weights) => {
                 let total = 0;
-                for (let i = 0; i < str.length; i++) {
-                    const char = str[i];
-                    // If it's a digit, cast it to number, otherwise convert from char code.
-                    const value = /[0-9]/.test(char) ? Number(char) : char.charCodeAt(0) - "0".charCodeAt(0);
+                for (let i = 0; i < cnpjSlice.length; i++) {
+                    const char = cnpjSlice[i];
+                    const value = char.charCodeAt(0) - 48;
                     total += value * weights[i];
                 }
                 const remainder = total % 11;
@@ -84,22 +96,10 @@ export default function CPFandCNPJvalidation() {
 
             // Return both check digits as a string and compare with the last two digits of the input.
             if ((firstDigit.toString() + secondDigit.toString()) === cnpj.substring(12)) {
-                this.setSuccess();
-                return;
+                return true;
             }
 
-            this.setErrorInvalid("CNPJ");
-            return;
-        },
-
-        setErrorInvalid(label) {
-            this.error = `${label} não é válido.`;
-            this.isValid = false;
-        },
-
-        setSuccess() {
-            this.error = false;
-            this.isValid = true;
+            return false;
         }
     }
 }

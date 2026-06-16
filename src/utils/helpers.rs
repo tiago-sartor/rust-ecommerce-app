@@ -1,4 +1,4 @@
-use crate::utils::errors::AppError;
+use crate::utils::AppError;
 use rand::distr::{Alphanumeric, SampleString};
 use serde::Serialize;
 use serde_json::Value;

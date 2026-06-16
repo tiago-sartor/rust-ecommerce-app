@@ -1,6 +1,5 @@
-use crate::utils::context::Context;
-use crate::server::handlers::backend::auth::ForgotPasswordPayload;
-use crate::utils::hypertext_elements;
+use crate::server::handlers::backend::payloads::ForgotPasswordPayload;
+use crate::utils::{Context, hypertext_elements};
 use hypertext::prelude::*;
 
 pub fn admin_forgot_password_template(ctx: &Context<ForgotPasswordPayload, ()>) -> impl Renderable {
@@ -62,7 +61,7 @@ pub fn admin_forgot_password_template(ctx: &Context<ForgotPasswordPayload, ()>) 
                             </div>
                         </form>
                         @if let Some(message) = ctx.flash_msg.get("forgot_password_success") {
-                            <div class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
+                            <div class="mt-4 rounded-lg border border-green-600 bg-green-50 p-4 text-sm font-medium text-green-600">
                                 (message)
                             </div>
                         }

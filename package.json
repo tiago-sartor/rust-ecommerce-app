@@ -19,8 +19,8 @@
     "devDependencies": {
         "tailwindcss": "^4.3.0",
         "@tailwindcss/cli": "^4.3.0",
-        "webpack": "^5.106.2",
-        "webpack-cli": "^7.0.2"
+        "webpack": "^5.107.2",
+        "webpack-cli": "^7.0.3"
     },
     "scripts": {
         "dev": "npm run webpack-dev && npm run tailwind-watch-frontend && npm run tailwind-watch-admin",

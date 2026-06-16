@@ -4,9 +4,11 @@ use axum::extract::Form;
 use std::collections::HashMap;
 
 pub struct Context<P = (), D = ()> {
-    pub admin: Admin,
+    pub admin: Option<Admin>,
     pub customer: Option<Customer>,
     pub product: Option<Product>,
+    // pub cart: Option<Cart>,
+    // pub order: Option<Order>,
     pub csrf_token: CsrfToken,
     pub payload: Form<P>,
     pub data: D,
@@ -17,9 +19,11 @@ pub struct Context<P = (), D = ()> {
 impl<P: Default, D: Default> Context<P, D> {
     pub fn new() -> Self {
         Context {
-            admin: Admin::new(),
+            admin: None,
             customer: None,
             product: None,
+            // cart: None,
+            // order: None,
             csrf_token: CsrfToken(String::new()),
             payload: Form(P::default()),
             data: D::default(),

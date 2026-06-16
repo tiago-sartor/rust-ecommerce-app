@@ -1,48 +1,27 @@
-use crate::backend::{layouts::*, templates::*};
+use crate::backend::templates::*;
+use crate::emails::Mailer;
 use crate::middlewares::csrf::CsrfToken;
 use crate::models::admin::Admin;
+use crate::server::handlers::backend::payloads::{ForgotPasswordPayload, LoginPayload, ResetPasswordPayload};
 use crate::shared::layouts::blank_layout::blank_layout;
-use crate::utils::{errors::AppError, helpers, password};
-use crate::utils::context::Context;
+use crate::utils::{AppError, Context, helpers, password};
 use axum::{
-    extract::{Form, Path, Query, State},
+    extract::{Extension, Form, Path, Query, State},
     response::{IntoResponse, Redirect, Response},
 };
 use hypertext::Renderable;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use time::OffsetDateTime;
 use tower_sessions::Session;
 use validator::Validate;
-use time::OffsetDateTime;
-use crate::emails::Mailer;
-
-#[derive(serde::Deserialize, validator::Validate, Default)]
-pub struct LoginPayload {
-    #[validate(email(message = "Please enter a valid email address"))]
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(serde::Deserialize, validator::Validate, Default)]
-pub struct ForgotPasswordPayload {
-    #[validate(email(message = "Please enter a valid email address"))]
-    pub email: String,
-}
-
-#[derive(serde::Deserialize, validator::Validate, Default)]
-pub struct ResetPasswordPayload {
-    #[validate(length(min = 8, max = 32, message = "Password must be between 8 and 32 characters"))]
-    pub password: String,
-    #[validate(must_match(other = "password", message = "Password does not match"))]
-    pub confirm_password: String,
-}
 
 /**
  * === GET ===> /admin/login
  */
 pub async fn admin_login_get(
     session: Session,
-    axum::extract::Extension(token): axum::extract::Extension<CsrfToken>,
+    Extension(token): Extension<CsrfToken>,
     Query(params): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, AppError> {
     if session.get::<i64>("admin_id").await?.is_some() {
@@ -60,7 +39,9 @@ pub async fn admin_login_get(
     }
 
     let template = admin_login_template(&ctx);
-    Ok(blank_layout("Admin Login", template, &ctx).render().into_response())
+    let html = blank_layout("Admin Login", template, &ctx, None);
+
+    Ok(html.render().into_response())
 }
 
 /**
@@ -68,7 +49,7 @@ pub async fn admin_login_get(
  */
 pub async fn admin_login_post(
     session: Session,
-    axum::extract::Extension(token): axum::extract::Extension<CsrfToken>,
+    Extension(token): Extension<CsrfToken>,
     State(pool): State<PgPool>,
     Form(payload): Form<LoginPayload>,
 ) -> Result<impl IntoResponse, AppError> {
@@ -86,7 +67,9 @@ pub async fn admin_login_post(
             ctx.errors.insert("login".to_string(), "Invalid email or password".to_string());
 
             let template = admin_login_template(&ctx);
-            Ok(blank_layout("Admin Login", template, &ctx).render().into_response())
+            let html = blank_layout("Admin Login", template, &ctx, None);
+
+            Ok(html.render().into_response())
         }
     }
 }
@@ -94,19 +77,21 @@ pub async fn admin_login_post(
 /**
  * === GET ===> /admin/forgot-password
  */
-pub async fn admin_forgot_password_get(axum::extract::Extension(token): axum::extract::Extension<CsrfToken>) -> Result<impl IntoResponse, AppError> {
+pub async fn admin_forgot_password_get(Extension(token): Extension<CsrfToken>) -> Result<impl IntoResponse, AppError> {
     let mut ctx = Context::new();
     ctx.csrf_token = token;
 
     let template = admin_forgot_password_template(&ctx);
-    Ok(blank_layout("Forgot Password", template, &ctx).render().into_response())
+    let html = blank_layout("Forgot Password", template, &ctx, None);
+
+    Ok(html.render().into_response())
 }
 
 /**
  * === POST ===> /admin/forgot-password
  */
 pub async fn admin_forgot_password_post(
-    axum::extract::Extension(token): axum::extract::Extension<CsrfToken>,
+    Extension(token): Extension<CsrfToken>,
     State(pool): State<PgPool>,
     Form(payload): Form<ForgotPasswordPayload>,
 ) -> Result<impl IntoResponse, AppError> {
@@ -117,7 +102,7 @@ pub async fn admin_forgot_password_post(
     if let Err(e) = ctx.payload.validate() {
         for (field, errs) in e.field_errors() {
             for err in errs {
-                if let Some(ref message) = err.message {
+                if let Some(message) = &err.message {
                     ctx.errors.insert(field.to_string(), message.to_string());
                 }
             }
@@ -139,7 +124,9 @@ pub async fn admin_forgot_password_post(
     }
 
     let template = admin_forgot_password_template(&ctx);
-    Ok(blank_layout("Forgot Password", template, &ctx).render().into_response())
+    let html = blank_layout("Forgot Password", template, &ctx, None);
+
+    Ok(html.render().into_response())
 }
 
 /**
@@ -147,7 +134,7 @@ pub async fn admin_forgot_password_post(
  */
 pub async fn admin_reset_password_get(
     Path(reset_token): Path<String>,
-    axum::extract::Extension(csrf_token): axum::extract::Extension<CsrfToken>,
+    Extension(csrf_token): Extension<CsrfToken>,
     State(pool): State<PgPool>,
 ) -> Result<impl IntoResponse, AppError> {
     let admin = Admin::get_by_reset_token(&reset_token, &pool).await?;
@@ -160,7 +147,9 @@ pub async fn admin_reset_password_get(
     ctx.csrf_token = csrf_token;
 
     let template = admin_reset_password_template(&ctx);
-    Ok(blank_layout("Reset Password", template, &ctx).render().into_response())
+    let html = blank_layout("Reset Password", template, &ctx, None);
+
+    Ok(html.render().into_response())
 }
 
 /**
@@ -169,7 +158,7 @@ pub async fn admin_reset_password_get(
 pub async fn admin_reset_password_post(
     session: Session,
     Path(reset_token): Path<String>,
-    axum::extract::Extension(csrf_token): axum::extract::Extension<CsrfToken>,
+    Extension(csrf_token): Extension<CsrfToken>,
     State(pool): State<PgPool>,
     Form(payload): Form<ResetPasswordPayload>,
 ) -> Result<Response, AppError> {
@@ -192,7 +181,9 @@ pub async fn admin_reset_password_post(
         ctx.errors = errors;
 
         let template = admin_reset_password_template(&ctx);
-        return Ok(blank_layout("Reset Password", template, &ctx).render().into_response());
+        let html = blank_layout("Reset Password", template, &ctx, None);
+
+        return Ok(html.render().into_response());
     }
 
     let hashed_password = password::hash_password(&ctx.payload.password)?;
@@ -205,7 +196,9 @@ pub async fn admin_reset_password_post(
             .insert("internal_error".to_string(), "Failed to update password. Please try again.".to_string());
 
         let template = admin_reset_password_template(&ctx);
-        Ok(blank_layout("Reset Password", template, &ctx).render().into_response())
+        let html = blank_layout("Reset Password", template, &ctx, None);
+
+        Ok(html.render().into_response())
     }
 }
 

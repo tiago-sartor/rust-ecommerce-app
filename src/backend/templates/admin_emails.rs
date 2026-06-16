@@ -1,23 +1,22 @@
-use crate::emails::mailer::{EmailLog, Status};
-use crate::utils::context::Context;
-use crate::utils::helpers;
-use crate::utils::hypertext_elements;
+use crate::emails::mailer::Status;
+use crate::server::handlers::backend::emails::Data;
+use crate::utils::{Context, helpers, hypertext_elements};
 use hypertext::validation::attributes::*;
 use hypertext::{Raw, Renderable, rsx};
 
-pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64, Option<Status>)>) -> impl Renderable {
-    let (logs, count, page, limit, filter_by_opt) = &ctx.data;
-    let filter_by = filter_by_opt.as_ref().map(|s| s.to_string()).unwrap_or("all".to_string());
+pub fn admin_emails_template(ctx: &Context<(), Data>) -> impl Renderable {
+    let Data { logs, count, page, limit, filter_by: filter_by_opt } = &ctx.data;
 
+    let filter_by = filter_by_opt.as_ref().map(|s| s.to_string()).unwrap_or("all".to_string());
     let showing_from = (page - 1) * limit + 1;
     let showing_to = i64::min(page * limit, *count);
     let total_pages = (*count as f64 / *limit as f64).ceil() as i64;
 
-    let all_ids: Vec<i64> = logs.iter().map(|l| l.id).collect();
-    let all_ids_json = serde_json::to_string(&all_ids).unwrap_or("[]".to_string());
+    let ids: Vec<i64> = logs.iter().map(|l| l.id).collect();
+    let ids_json = serde_json::to_string(&ids).unwrap_or("[]".to_string());
 
     rsx! {
-        <div x-data=(format!("checkboxes({all_ids_json})")) class="mx-auto max-w-(--breakpoint-2xl) px-5 py-4 md:p-6">
+        <div x-data=(format!("checkboxSelector({ids_json})")) class="mx-auto max-w-(--breakpoint-2xl) px-5 py-4 md:p-6">
             <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-white/3">
                 <div class="flex flex-col justify-between gap-5 border-b border-neutral-200 px-5 py-4 sm:flex-row sm:items-center dark:border-neutral-800">
                     <div>
@@ -53,10 +52,10 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64, Op
                                 <form method="POST" action="/admin/emails/bulk-actions">
                                     <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
                                     <input type="hidden" name="ids" x-bind:value="JSON.stringify(selected)" />
-                                    <button type="submit" name="action" value="resend" class="text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                    <button type="submit" name="action" value="resend" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
                                         "Resend selected"
                                     </button>
-                                    <button type="submit" name="action" value="delete" class="text-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-700">
+                                    <button type="submit" name="action" value="delete" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-red-50 hover:text-red-700">
                                         "Delete selected"
                                     </button>
                                 </form>
@@ -197,7 +196,7 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64, Op
                                                 </form>
                                                 <form method="POST" action=(format!("/admin/emails/{}/delete", log.id))>
                                                     <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
-                                                    <button class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
+                                                    <button class="text-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-neutral-500 hover:bg-red-50 hover:text-red-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-300">
                                                         "Delete"
                                                     </button>
                                                 </form>
@@ -251,7 +250,7 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64, Op
                     </div>
                     <div class="flex w-full items-center justify-between gap-2 rounded-lg bg-neutral-50 p-4 sm:w-auto sm:justify-normal sm:rounded-none sm:bg-transparent sm:p-0 dark:bg-neutral-900 dark:sm:bg-transparent">
                         <a
-                            x-bind:href=(if *page > 1 { let p = *page - 1; format!("true ? '/admin/emails?page={p}&limit={limit}&filter_by={filter_by}' : ''") } else { "false".to_string() })
+                            x-bind:href=(if *page > 1 { let p = page - 1; format!("true ? '/admin/emails?page={p}&limit={limit}&filter_by={filter_by}' : ''") } else { "false".to_string() })
                             class="
                                 shadow-xs flex items-center gap-2 rounded-lg border p-2 text-neutral-700 sm:p-2.5 border-neutral-300 bg-white hover:bg-neutral-50 hover:text-neutral-800
                                 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-white/3 dark:hover:text-neutral-200
@@ -305,81 +304,35 @@ pub fn admin_emails_template(ctx: &Context<(), (Vec<EmailLog>, i64, i64, i64, Op
 
         <script>
             // XSS SAFETY: This is a statically typed string.
-            (Raw::dangerously_create(r#"
-                function checkboxes(ids) {
-                    return {
-                        selected: [],
-                        allIds: ids,
-                        isAllSelected() {
-                            return this.allIds.length > 0 && this.selected.length === this.allIds.length;
-                        },
-                        toggleAll() {
-                            this.selected = this.isAllSelected() ? [] : [...this.allIds];
-                        },
-                        toggleSelect(id) {
-                            const idx = this.selected.indexOf(id);
-                            if (idx === -1) {
-                                this.selected.push(id);
-                            } else {
-                                this.selected.splice(idx, 1);
-                            }
-                        },
-                    }
-                }
-
-                function actionDropdown() {
-                    return {
-                        open: false,
-                        toggle() {
-                            this.open = !this.open;
-                            if (this.open) this.position();
-                        },
-                        position() {
-                            this.$nextTick(() => {
-                                const button = this.$el;
-                                const dropdown = this.$refs.dropdown;
-                                const rect = button.getBoundingClientRect();
-                                dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-                                dropdown.style.right = `${window.innerWidth - rect.right}px`;
-
-                                // Reposition if would overflow viewport
-                                const dropdownRect = dropdown.getBoundingClientRect();
-                                if (dropdownRect.bottom > window.innerHeight) {
-                                    dropdown.style.top = `${rect.top + window.scrollY - dropdownRect.height}px`;
-                                }
-                            });
-                        }
-                    }                
-                }
-
+            (Raw::dangerously_create(r#"             
                 function details() {
                     return {
-                            html_body: "",
-                            server_response: "",
-                            openDetailsModal: false,
-                            loading: false,
+                        html_body: "",
+                        server_response: "",
+                        openDetailsModal: false,
+                        loading: false,
 
-                            async fetchDetails(id) {
-                                const url = `/admin/emails/${id}/details`;
+                        async fetchDetails(id) {
+                            const url = `/admin/emails/${id}/details`;
 
-                                this.openDetailsModal = true;
-                                this.loading = true;
+                            this.openDetailsModal = true;
+                            this.loading = true;
 
-                                try {
-                                    const response = await fetch(url);
-                                    if (!response.ok) throw new Error(`Request failed. Status code: ${response.status}`);
+                            try {
+                                const response = await fetch(url);
+                                if (!response.ok) throw new Error(`Request failed. Status code: ${response.status}`);
 
-                                    const data = await response.json();
-                                    if (!data) throw new Error('Response is not valid JSON.');
+                                const data = await response.json();
+                                if (!data) throw new Error('Response is not valid JSON.');
 
-                                    this.html_body = data.html;
-                                    this.server_response = JSON.stringify(data.response, null, 3);
-                                } catch (error) {
-                                    console.error('Error fetching log details: ', error);
-                                } finally {
-                                    this.loading = false;
-                                }
+                                this.html_body = data.html;
+                                this.server_response = JSON.stringify(data.response, null, 3);
+                            } catch (error) {
+                                console.error('Error fetching log details: ', error);
+                            } finally {
+                                this.loading = false;
                             }
+                        }
                     }
                 }
             "#))

@@ -19,18 +19,19 @@ pub struct Admin {
     pub reset_expires_at: Option<OffsetDateTime>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, sqlx::Type)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(rename_all = "lowercase")]
 pub enum AdminRole {
+    #[default]
     Admin,
     Manager,
     Editor,
     Support,
 }
 
-impl Admin {
-    pub fn new() -> Self {
-        Admin {
+impl Default for Admin {
+    fn default() -> Self {
+        Self {
             id: 0,
             first_name: String::new(),
             last_name: String::new(),
@@ -38,14 +39,21 @@ impl Admin {
             password_hash: String::new(),
             phone: String::new(),
             profile_image_url: None,
-            role: AdminRole::Admin,
+            role: AdminRole::default(),
             is_active: false,
             last_login: None,
-            created_at: OffsetDateTime::now_utc(),
-            updated_at: OffsetDateTime::now_utc(),
+            created_at: OffsetDateTime::UNIX_EPOCH,
+            updated_at: OffsetDateTime::UNIX_EPOCH,
             reset_token: None,
             reset_expires_at: None,
         }
+    }
+}
+
+impl Admin {
+    /// Conventional constructor that returns a default Admin.
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub async fn get_by_email(email: &str, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
@@ -60,7 +68,7 @@ impl Admin {
                    phone,
                    profile_image_url,
                    role as "role!: AdminRole",
-                   is_active as "is_active!",
+                   is_active,
                    last_login as "last_login?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",
@@ -87,7 +95,7 @@ impl Admin {
                    phone,
                    profile_image_url,
                    role as "role!: AdminRole",
-                   is_active as "is_active!",
+                   is_active,
                    last_login as "last_login?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",
@@ -114,7 +122,7 @@ impl Admin {
                    phone,
                    profile_image_url,
                    role as "role!: AdminRole",
-                   is_active as "is_active!",
+                   is_active,
                    last_login as "last_login?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",
@@ -185,7 +193,7 @@ impl Admin {
                    phone,
                    profile_image_url,
                    role as "role!: AdminRole",
-                   is_active as "is_active!",
+                   is_active,
                    last_login as "last_login?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",

@@ -1,6 +1,5 @@
-use crate::utils::context::Context;
-use crate::server::handlers::backend::auth::ResetPasswordPayload;
-use crate::utils::hypertext_elements;
+use crate::server::handlers::backend::payloads::ResetPasswordPayload;
+use crate::utils::{Context, hypertext_elements};
 use hypertext::prelude::*;
 
 pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) -> impl Renderable {
@@ -144,7 +143,7 @@ pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) ->
                             </div>
                         </form>
                         @if let Some(err) = ctx.errors.get("internal_error") {
-                            <div class="mt-4 rounded-lg border border-green-600 bg-green-100 p-4 text-sm font-medium text-green-600">
+                            <div class="mt-4 rounded-lg border border-red-600 bg-red-50 p-4 text-sm font-medium text-red-600">
                                 (err)
                             </div>
                         }

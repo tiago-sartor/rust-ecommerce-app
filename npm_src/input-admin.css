@@ -2,7 +2,8 @@
 
 @import "tailwindcss" source(none);
 
-@source "../src/backend/";
+@source "../src/";
+@source "!../src/frontend/"; /* exclude frontend styles from admin build */
 
 @theme {
   --font-sans: "Inter", sans-serif;

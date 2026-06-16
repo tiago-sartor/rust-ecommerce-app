@@ -10,6 +10,9 @@ pub use admin_add_order::*;
 pub mod admin_add_product;
 pub use admin_add_product::*;
 
+pub mod admin_customers;
+pub use admin_customers::*;
+
 pub mod admin_dashboard;
 pub use admin_dashboard::*;
 

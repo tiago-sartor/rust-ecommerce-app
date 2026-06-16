@@ -1,10 +1,9 @@
-use crate::server::handlers::backend::*;
-use crate::utils::context::Context;
-use crate::utils::hypertext_elements;
+use crate::utils::{Context, hypertext_elements};
 use hypertext::prelude::*;
 
-pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P, D>) -> impl Renderable {
+pub fn admin_layout<P, D>(title: &str, content: impl Renderable, context: &Context<P, D>, scripts: Option<Vec<&str>>) -> impl Renderable {
     let full_title = format!("{} | Admin Dashboard", title);
+    let admin = context.admin.as_ref().expect("An admin user must be logged in.");
 
     rsx! {
         <!DOCTYPE html>
@@ -14,13 +13,21 @@ pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             // CSRF
-            <meta name="csrf-token" content=(ctx.csrf_token.0)>
+            <meta name="csrf-token" content=(context.csrf_token.0)>
             // Title
             <title>(full_title)</title>
             // Favicon
             <link href="/assets/favicon.webp" rel="icon" type="image/webp">
             // CSS
             <link href="/assets/css/admin.css" rel="stylesheet" type="text/css">
+
+            // Render optional scripts if they exist
+            @if let Some(s) = &scripts {
+                @for script in s {
+                    <script defer src=(format!("/assets/js/{script}.js"))></script>
+                }
+            }
+
             // AlpineJS
             <script defer src="/assets/js/app.js"></script>
         </head>
@@ -651,8 +658,9 @@ pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
                                 // User Area
                                 <div
                                     class="relative"
-                                    x-data=(format!(r#"{{ dropdownOpen: false, profileImage: '{:?}' }}"#, ctx.admin.profile_image_url))
-                                    x-on:click.outside="dropdownOpen = false">
+                                    x-data=(format!(r#"{{ dropdownOpen: false, profileImage: '{}' }}"#, admin.profile_image_url.as_deref().unwrap_or("")))
+                                    x-on:click.outside="dropdownOpen = false"
+                                >
                                     <a
                                         class="flex items-center text-neutral-700 "
                                         href="#"
@@ -670,7 +678,7 @@ pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
                                         </span>
 
                                         <span class="text-sm mr-1 block font-medium">
-                                            (ctx.admin.first_name)" "(ctx.admin.last_name)
+                                            (admin.first_name)" "(admin.last_name)
                                         </span>
 
                                         <svg
@@ -695,10 +703,10 @@ pub fn admin_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
                                         class="shadow-lg absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-neutral-200 bg-white p-3">
                                         <div>
                                             <span class="text-sm block font-medium text-neutral-700">
-                                                (ctx.admin.first_name)" "(ctx.admin.last_name)
+                                                (admin.first_name)" "(admin.last_name)
                                             </span>
                                             <span class="text-xs mt-0.5 block text-neutral-500">
-                                                (ctx.admin.email)
+                                                (admin.email)
                                             </span>
                                         </div>
 

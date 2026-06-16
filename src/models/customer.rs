@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 use time::OffsetDateTime;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -11,21 +12,95 @@ pub struct Customer {
     pub phone: String,
     pub profile_image_url: Option<String>,
     pub cpf: Option<String>,
-    pub company_name: Option<String>,
     pub cnpj: Option<String>,
+    pub company_name: Option<String>,
     pub state_registration: Option<String>,
-    pub is_active: bool,
+    pub is_subscribed: bool,
     pub last_login: Option<OffsetDateTime>,
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
+    pub reset_token: Option<String>,
+    pub reset_expires_at: Option<OffsetDateTime>,
+}
+
+impl Default for Customer {
+    fn default() -> Self {
+        Self {
+            id: 0,
+            first_name: String::new(),
+            last_name: String::new(),
+            email: String::new(),
+            password_hash: String::new(),
+            phone: String::new(),
+            profile_image_url: None,
+            cpf: None,
+            cnpj: None,
+            company_name: None,
+            state_registration: None,
+            is_subscribed: false,
+            last_login: None,
+            created_at: OffsetDateTime::UNIX_EPOCH,
+            updated_at: OffsetDateTime::UNIX_EPOCH,
+            reset_token: None,
+            reset_expires_at: None,
+        }
+    }
 }
 
 impl Customer {
-    pub async fn get_by_email(email: &str, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn get_by_id(id: &i64, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
             r#"
-            SELECT id, first_name, last_name, email, password_hash, phone, profile_image_url, cpf, company_name, cnpj, state_registration, is_active as "is_active!", last_login as "last_login?: OffsetDateTime", created_at as "created_at!: OffsetDateTime", updated_at as "updated_at!: OffsetDateTime"
+            SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                password_hash,
+                phone,
+                profile_image_url,
+                cpf,
+                cnpj,
+                company_name,
+                state_registration,
+                is_subscribed,
+                last_login as "last_login?: OffsetDateTime",
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime",
+                reset_token,
+                reset_expires_at as "reset_expires_at?: OffsetDateTime"
+            FROM customers
+            WHERE id = $1
+            "#,
+            id
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    pub async fn get_by_email(email: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as!(
+            Self,
+            r#"
+            SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                password_hash,
+                phone,
+                profile_image_url,
+                cpf,
+                cnpj,
+                company_name,
+                state_registration,
+                is_subscribed,
+                last_login as "last_login?: OffsetDateTime",
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime",
+                reset_token,
+                reset_expires_at as "reset_expires_at?: OffsetDateTime"
             FROM customers
             WHERE email = $1
             "#,
@@ -35,86 +110,201 @@ impl Customer {
         .await
     }
 
-    pub async fn get_by_id(id: &i64, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn get_by_cpf(cpf: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
             r#"
-            SELECT id, first_name, last_name, email, password_hash, phone, profile_image_url, cpf, company_name, cnpj, state_registration, is_active as "is_active!", last_login as "last_login?: OffsetDateTime", created_at as "created_at!: OffsetDateTime", updated_at as "updated_at!: OffsetDateTime"
+            SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                password_hash,
+                phone,
+                profile_image_url,
+                cpf,
+                cnpj,
+                company_name,
+                state_registration,
+                is_subscribed,
+                last_login as "last_login?: OffsetDateTime",
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime",
+                reset_token,
+                reset_expires_at as "reset_expires_at?: OffsetDateTime"
             FROM customers
-            WHERE id = $1
+            WHERE cpf = $1
             "#,
-            id
+            cpf
         )
         .fetch_optional(pool)
         .await
     }
-}
 
-pub async fn get_customer_by_cpf(cpf: &str) -> Option<Customer> {
-    let now = OffsetDateTime::now_utc();
-
-    // Simulate fetching customer from a database
-    if cpf == "123.456.789-00" {
-        Some(Customer {
-            id: 1,
-            first_name: "John".to_string(),
-            last_name: "Doe".to_string(),
-            email: "john.doe@example.com".to_string(),
-            password_hash: "hashed_password".to_string(),
-            phone: "1234567890".to_string(),
-            profile_image_url: None,
-            cpf: Some("123.456.789-00".to_string()),
-            company_name: None,
-            cnpj: None,
-            state_registration: None,
-            is_active: true,
-            last_login: None,
-            created_at: now,
-            updated_at: now,
-        })
-    } else {
-        None
+    pub async fn get_by_cnpj(cnpj: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as!(
+            Self,
+            r#"
+           SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                password_hash,
+                phone,
+                profile_image_url,
+                cpf,
+                cnpj,
+                company_name,
+                state_registration,
+                is_subscribed,
+                last_login as "last_login?: OffsetDateTime",
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime",
+                reset_token,
+                reset_expires_at as "reset_expires_at?: OffsetDateTime"
+            FROM customers
+            WHERE cnpj = $1
+            "#,
+            cnpj
+        )
+        .fetch_optional(pool)
+        .await
     }
-}
 
-pub async fn get_customer_by_cnpj(cnpj: &str) -> Option<Customer> {
-    let now = OffsetDateTime::now_utc();
+    pub async fn get_paginated(page: i64, limit: i64, _order_by: &str, pool: &PgPool) -> Result<(Vec<Self>, i64), sqlx::Error> {
+        let offset = (page - 1) * limit;
 
-    // Simulate fetching customer from a database
-    if cnpj == "12.345.678/0001-00" {
-        Some(Customer {
-            id: 1,
-            first_name: "John".to_string(),
-            last_name: "Doe".to_string(),
-            email: "john.doe@example.com".to_string(),
-            password_hash: "hashed_password".to_string(),
-            phone: "1234567890".to_string(),
-            profile_image_url: None,
-            cpf: None,
-            company_name: Some("Awesome Company LLC".to_string()),
-            cnpj: Some("12.345.678/0001-00".to_string()),
-            state_registration: None,
-            is_active: true,
-            last_login: None,
-            created_at: now,
-            updated_at: now,
-        })
-    } else {
-        None
+        let customers = sqlx::query_as!(
+            Self,
+            r#"
+            SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                password_hash,
+                phone,
+                profile_image_url,
+                cpf,
+                cnpj,
+                company_name,
+                state_registration,
+                is_subscribed,
+                last_login as "last_login?: OffsetDateTime",
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime",
+                reset_token,
+                reset_expires_at as "reset_expires_at?: OffsetDateTime"
+            FROM customers
+            ORDER BY id DESC
+            LIMIT $1 OFFSET $2
+            "#,
+            limit,
+            offset
+        )
+        .fetch_all(pool)
+        .await?;
+
+        let total_count = sqlx::query!(
+            r#"
+            SELECT COUNT(*) as "count!"
+            FROM customers
+            "#
+        )
+        .fetch_one(pool)
+        .await?
+        .count;
+
+        Ok((customers, total_count))
     }
-}
 
-pub async fn create_customer(customer: Customer) -> Customer {
-    // Simulate creating a customer in a database
-    customer
-}
+    pub async fn create(customer: &Customer, pool: &PgPool) -> Result<Customer, sqlx::Error> {
+        sqlx::query_as!(
+            Self,
+            r#"
+            INSERT INTO customers (first_name, last_name, email, password_hash, phone, profile_image_url, cpf, cnpj, company_name, state_registration)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING
+                id,
+                first_name,
+                last_name,
+                email,
+                password_hash,
+                phone,
+                profile_image_url,
+                cpf,
+                cnpj,
+                company_name,
+                state_registration,
+                is_subscribed,
+                last_login as "last_login?: OffsetDateTime",
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime",
+                reset_token,
+                reset_expires_at as "reset_expires_at?: OffsetDateTime"
+            "#,
+            customer.first_name,
+            customer.last_name,
+            customer.email,
+            customer.password_hash,
+            customer.phone,
+            customer.profile_image_url,
+            customer.cpf,
+            customer.cnpj,
+            customer.company_name,
+            customer.state_registration
+        )
+        .fetch_one(pool)
+        .await
+    }
 
-pub async fn update_customer(customer_id: &i64, updated_customer: Customer) -> Option<Customer> {
-    // Simulate updating a customer in a database
-    if *customer_id == 1 { Some(updated_customer) } else { None }
-}
+    pub async fn update(customer_id: &i64, customer: Customer, pool: &PgPool) -> Option<Customer> {
+        if *customer_id == 1 { Some(customer) } else { None }
+    }
 
-pub async fn delete_customer(customer_id: &i64) -> bool {
-    // Simulate deleting a customer from a database
-    *customer_id == 1
+    pub async fn delete(customer_id: &i64, pool: &PgPool) -> bool {
+        // Implementation for deleting a customer
+        false
+    }
+
+    pub async fn create_tx(customer: &Customer, tx: &mut sqlx::Transaction<'_, sqlx::Postgres>) -> Result<Customer, sqlx::Error> {
+        sqlx::query_as!(
+            Self,
+            r#"
+            INSERT INTO customers (first_name, last_name, email, password_hash, phone, profile_image_url, cpf, cnpj, company_name, state_registration)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING
+                id,
+                first_name,
+                last_name,
+                email,
+                password_hash,
+                phone,
+                profile_image_url,
+                cpf,
+                cnpj,
+                company_name,
+                state_registration,
+                is_subscribed,
+                last_login as "last_login?: OffsetDateTime",
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime",
+                reset_token,
+                reset_expires_at as "reset_expires_at?: OffsetDateTime"
+            "#,
+            customer.first_name,
+            customer.last_name,
+            customer.email,
+            customer.password_hash,
+            customer.phone,
+            customer.profile_image_url,
+            customer.cpf,
+            customer.cnpj,
+            customer.company_name,
+            customer.state_registration
+        )
+        .fetch_one(&mut **tx)
+        .await
+    }
 }

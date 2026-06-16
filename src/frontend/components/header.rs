@@ -1,5 +1,4 @@
-use crate::utils::context::Context;
-use crate::utils::hypertext_elements;
+use crate::utils::{Context, hypertext_elements};
 use hypertext::prelude::*;
 
 pub fn header(ctx: &Context) -> impl Renderable {

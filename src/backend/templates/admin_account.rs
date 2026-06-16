@@ -1,12 +1,10 @@
-use crate::server::handlers::backend::*;
-use crate::utils::context::Context;
-use crate::utils::helpers;
-use crate::utils::hypertext_elements;
+use crate::utils::{Context, helpers, hypertext_elements};
 use hypertext::prelude::*;
 
 pub fn admin_account_template(ctx: &Context) -> impl Renderable {
-    let last_login = ctx.admin.last_login.map(helpers::format_datetime_to_br).unwrap_or_default();
-    let created_at = helpers::format_datetime_to_br(ctx.admin.created_at);
+    let admin = ctx.admin.as_ref().expect("admin must be logged in");
+    let last_login = admin.last_login.map(helpers::format_datetime_to_br).unwrap_or_default();
+    let created_at = helpers::format_datetime_to_br(admin.created_at);
 
     rsx! {
     <div x-data=(format!(r#"{{
@@ -30,7 +28,7 @@ pub fn admin_account_template(ctx: &Context) -> impl Renderable {
                 }}
             }} catch (error) {{ console.error('Upload failed:', error); }}
         }},
-    }}"#, ctx.admin.profile_image_url.as_deref().unwrap_or_default())) >
+    }}"#, admin.profile_image_url.as_deref().unwrap_or_default())) >
         <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
             <div class="rounded-2xl border border-neutral-200 bg-white p-5 lg:p-6">
                 <h3 class="mb-5 text-lg font-semibold text-neutral-800 lg:mb-7">
@@ -69,11 +67,11 @@ pub fn admin_account_template(ctx: &Context) -> impl Renderable {
                             </form>
                             <div class="order-3 xl:order-2">
                                 <h4 class="mb-2 text-lg font-semibold text-center text-neutral-800 xl:text-left">
-                                    (ctx.admin.first_name)" "(ctx.admin.last_name)
+                                    (admin.first_name)" "(admin.last_name)
                                 </h4>
                                 <div class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                                     <p class="text-sm text-neutral-500 capitalize">
-                                        (format!("{:?}", ctx.admin.role))
+                                        (format!("{:?}", admin.role))
                                     </p>
                                 </div>
                             </div>
@@ -103,7 +101,7 @@ pub fn admin_account_template(ctx: &Context) -> impl Renderable {
                                         "First Name"
                                     </p>
                                     <p class="text-sm font-medium text-neutral-800">
-                                        (ctx.admin.first_name)
+                                        (admin.first_name)
                                     </p>
                                 </div>
 
@@ -112,7 +110,7 @@ pub fn admin_account_template(ctx: &Context) -> impl Renderable {
                                         "Last Name"
                                     </p>
                                     <p class="text-sm font-medium text-neutral-800">
-                                        (ctx.admin.last_name)
+                                        (admin.last_name)
                                     </p>
                                 </div>
 
@@ -121,7 +119,7 @@ pub fn admin_account_template(ctx: &Context) -> impl Renderable {
                                         "E-mail"
                                     </p>
                                     <p class="text-sm font-medium text-neutral-800">
-                                        (ctx.admin.email)
+                                        (admin.email)
                                     </p>
                                 </div>
 
@@ -130,7 +128,7 @@ pub fn admin_account_template(ctx: &Context) -> impl Renderable {
                                         "Phone"
                                     </p>
                                     <p class="text-sm font-medium text-neutral-800">
-                                        (ctx.admin.phone)
+                                        (admin.phone)
                                     </p>
                                 </div>
                             </div>

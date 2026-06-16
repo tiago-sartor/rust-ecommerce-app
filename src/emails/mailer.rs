@@ -154,7 +154,7 @@ impl Mailer {
         .fetch_all(pool)
         .await?;
 
-        let count_record = sqlx::query!(
+        let total_count = sqlx::query!(
             r#"
             SELECT COUNT(*) as "count!"
             FROM email_logs
@@ -163,9 +163,10 @@ impl Mailer {
             &filter_by as &Option<Status>
         )
         .fetch_one(pool)
-        .await?;
+        .await?
+        .count;
 
-        Ok((logs, count_record.count))
+        Ok((logs, total_count))
     }
 
     pub async fn get_log_details(id: i64, pool: &PgPool) -> Result<serde_json::Value, EmailError> {

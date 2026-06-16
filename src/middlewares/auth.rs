@@ -1,6 +1,6 @@
 use crate::models::admin::Admin;
 use crate::models::customer::Customer;
-use crate::utils::errors::AppError;
+use crate::utils::AppError;
 use axum::{
     extract::{Request, State},
     middleware::Next,

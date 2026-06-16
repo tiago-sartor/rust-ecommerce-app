@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS admins (
     reset_expires_at   TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);
-CREATE INDEX IF NOT EXISTS idx_admins_reset_token ON admins(reset_token);
+CREATE INDEX IF NOT EXISTS idx_admins_role         ON  admins(role);
+CREATE INDEX IF NOT EXISTS idx_admins_reset_token  ON  admins(reset_token) WHERE reset_token IS NOT NULL;
 
 -- Create a mock admin user for first time access. 
 -- Password: admin123

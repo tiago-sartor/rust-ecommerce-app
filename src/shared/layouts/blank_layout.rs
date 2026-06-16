@@ -1,8 +1,7 @@
-use crate::utils::context::Context;
-use crate::utils::hypertext_elements;
+use crate::utils::{Context, hypertext_elements};
 use hypertext::prelude::*;
 
-pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P, D>) -> impl Renderable {
+pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P, D>, scripts: Option<Vec<&str>>) -> impl Renderable {
     let full_title = format!("{title} | Rust Ecommerce App");
 
     rsx! {
@@ -22,6 +21,13 @@ pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
             <link href="/assets/css/admin.css" rel="stylesheet" type="text/css">
             // AlpineJS
             <script defer src="/assets/js/app.js"></script>
+
+            // Render optional scripts if they exist
+            @if let Some(s) = &scripts {
+                @for script in s {
+                    <script defer src=(format!("/assets/js/{script}.js"))></script>
+                }
+            }
         </head>
 
         <body>

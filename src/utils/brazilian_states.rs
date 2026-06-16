@@ -1,13 +1,26 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
+use crate::models::IntoSelectOption;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, sqlx::Type)]
+#[sqlx(type_name = "text")]
+#[sqlx(rename_all = "UPPERCASE")]
 pub enum BrazilianStates {
     AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO,
 }
 
 impl BrazilianStates {
+    /// Returns an iterator over all variants
+    pub fn all() -> &'static [BrazilianStates] {
+        &[
+            Self::AC, Self::AL, Self::AP, Self::AM, Self::BA, Self::CE, Self::DF, Self::ES,
+            Self::GO, Self::MA, Self::MT, Self::MS, Self::MG, Self::PA, Self::PB, Self::PR,
+            Self::PE, Self::PI, Self::RJ, Self::RN, Self::RS, Self::RO, Self::RR, Self::SC,
+            Self::SP, Self::SE, Self::TO,
+        ]
+    }
+    
     /// Returns the two-letter symbol (abbreviation)
     pub fn symbol(&self) -> &'static str {
         match self {
@@ -21,58 +34,71 @@ impl BrazilianStates {
         }
     }
 
-    /// Returns an iterator over all variants
-    pub fn all() -> &'static [BrazilianStates] {
-        &[
-            Self::AC, Self::AL, Self::AP, Self::AM, Self::BA, Self::CE, Self::DF, Self::ES,
-            Self::GO, Self::MA, Self::MT, Self::MS, Self::MG, Self::PA, Self::PB, Self::PR,
-            Self::PE, Self::PI, Self::RJ, Self::RN, Self::RS, Self::RO, Self::RR, Self::SC,
-            Self::SP, Self::SE, Self::TO,
-        ]
-    }
+    /// Returns the full name of the state as a static string slice                                                                                                                                                            
+    pub fn name(&self) -> &'static str {                                                                                                                                                                                       
+        match self {                                                                                                                                                                                                           
+            Self::AC => "Acre",                                                                                                                                                                                                
+            Self::AL => "Alagoas",                                                                                                                                                                                             
+            Self::AP => "Amapá",                                                                                                                                                                                               
+            Self::AM => "Amazonas",                                                                                                                                                                                            
+            Self::BA => "Bahia",                                                                                                                                                                                               
+            Self::CE => "Ceará",                                                                                                                                                                                               
+            Self::DF => "Distrito Federal",                                                                                                                                                                                    
+            Self::ES => "Espírito Santo",                                                                                                                                                                                      
+            Self::GO => "Goiás",                                                                                                                                                                                               
+            Self::MA => "Maranhão",                                                                                                                                                                                            
+            Self::MT => "Mato Grosso",                                                                                                                                                                                         
+            Self::MS => "Mato Grosso do Sul",                                                                                                                                                                                  
+            Self::MG => "Minas Gerais",                                                                                                                                                                                        
+            Self::PA => "Pará",                                                                                                                                                                                                
+            Self::PB => "Paraíba",                                                                                                                                                                                             
+            Self::PR => "Paraná",                                                                                                                                                                                              
+            Self::PE => "Pernambuco",                                                                                                                                                                                          
+            Self::PI => "Piauí",                                                                                                                                                                                               
+            Self::RJ => "Rio de Janeiro",                                                                                                                                                                                      
+            Self::RN => "Rio Grande do Norte",                                                                                                                                                                                 
+            Self::RS => "Rio Grande do Sul",                                                                                                                                                                                   
+            Self::RO => "Rondônia",                                                                                                                                                                                            
+            Self::RR => "Roraima",                                                                                                                                                                                             
+            Self::SC => "Santa Catarina",                                                                                                                                                                                      
+            Self::SP => "São Paulo",                                                                                                                                                                                           
+            Self::SE => "Sergipe",                                                                                                                                                                                             
+            Self::TO => "Tocantins",                                                                                                                                                                                           
+        }                                                                                                                                                                                                                      
+    }      
 }
 
 impl fmt::Display for BrazilianStates {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let name = match self {
-            Self::AC => "Acre",
-            Self::AL => "Alagoas",
-            Self::AP => "Amapá",
-            Self::AM => "Amazonas",
-            Self::BA => "Bahia",
-            Self::CE => "Ceará",
-            Self::DF => "Distrito Federal",
-            Self::ES => "Espírito Santo",
-            Self::GO => "Goiás",
-            Self::MA => "Maranhão",
-            Self::MT => "Mato Grosso",
-            Self::MS => "Mato Grosso do Sul",
-            Self::MG => "Minas Gerais",
-            Self::PA => "Pará",
-            Self::PB => "Paraíba",
-            Self::PR => "Paraná",
-            Self::PE => "Pernambuco",
-            Self::PI => "Piauí",
-            Self::RJ => "Rio de Janeiro",
-            Self::RN => "Rio Grande do Norte",
-            Self::RS => "Rio Grande do Sul",
-            Self::RO => "Rondônia",
-            Self::RR => "Roraima",
-            Self::SC => "Santa Catarina",
-            Self::SP => "São Paulo",
-            Self::SE => "Sergipe",
-            Self::TO => "Tocantins",
-        };
-        write!(f, "{}", name)
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {        
+        write!(f, "{}", self.name())
     }
 }
+
+/**
+ * Implements the `IntoSelectOption` trait for `BrazilianStates`, allowing
+ * each state to be easily converted into a select option with its symbol
+ * as the value and its full name as the label.
+ */
+impl IntoSelectOption for BrazilianStates {                                                                                                                                                                                    
+    fn to_value(&self) -> &'static str {                                                                                                                                                                                          
+        self.symbol()                                                                                                                                                                                                      
+    }                                                                                                                                                                                                                          
+    fn to_label(&self) -> &'static str {                                                                                                                                                                                          
+        self.name()                                                                                                                                                                                                                       
+    }                                                                                                                                                                                                                          
+}
+
+/**
+ * Implements parsing from a string to a BrazilianStates enum variant, allowing for case-insensitive matching of the two-letter symbols.
+ * If the input string does not match any valid state symbol, it returns a ParseBrazilianStatesError.
+ */
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseBrazilianStatesError;
 
 impl fmt::Display for ParseBrazilianStatesError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "invalid Brazilian state symbol")
+        write!(f, "Invalid or missing Brazilian state symbol")
     }
 }
 

@@ -3,7 +3,7 @@
 
 @import "tailwindcss" source(none);
 
-@source "../mvc/views/frontend/";
+@source "../src/frontend/";
 
 @theme {
   --font-sans: "DM Sans", sans-serif;

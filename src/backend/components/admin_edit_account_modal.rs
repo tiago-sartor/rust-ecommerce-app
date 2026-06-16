@@ -1,3 +1,4 @@
+use crate::utils::hypertext_elements;
 use hypertext::prelude::*;
 
 pub struct AdminInfo<'a> {
@@ -15,8 +16,6 @@ pub struct AdminErrors<'a> {
     pub email: Option<Vec<&'a str>>,
     pub phone: Option<Vec<&'a str>>,
 }
-
-use crate::utils::hypertext_elements;
 
 pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a>) -> impl Renderable + 'a {
     rsx! {
@@ -89,7 +88,7 @@ pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a
                                 <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-400">
                                     "Phone"
                                 </label>
-                                <input x-mask="(99) 99999-9999" type="number" name="phone" inputmode="numeric"
+                                <input "x-mask:dynamic"="'(99) 99999-9999'" type="number" name="phone" inputmode="numeric"
                                     value=(admin.phone) placeholder="(11) 98765-4321"
                                     class="h-11 w-full appearance-none rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm text-neutral-800 shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
                                 @if let Some(errors) = &admin.errors.phone {

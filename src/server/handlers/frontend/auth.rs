@@ -1,6 +1,5 @@
 use crate::models::customer::Customer;
-use crate::utils::errors::AppError;
-use crate::utils::helpers;
+use crate::utils::{AppError, helpers};
 use axum::{
     extract::{Form, State},
     response::{Html, IntoResponse, Redirect},
