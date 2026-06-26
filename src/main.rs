@@ -1,4 +1,8 @@
-use axum::{Router, middleware};
+use axum::{
+    Router,
+    http::{HeaderName, HeaderValue, Method, header::CONTENT_TYPE},
+    middleware,
+};
 use sqlx::PgPool;
 use tokio::{signal, task::AbortHandle};
 use tower_http::{cors::CorsLayer, services::ServeDir};
@@ -13,10 +17,10 @@ async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
     init_tracing();
 
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = PgPool::connect(&database_url).await.expect("Failed to connect to database");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set.");
+    let pool = PgPool::connect(&database_url).await.expect("Failed to connect to database.");
 
-    sqlx::migrate!("./src/migrations").run(&pool).await.expect("Failed to run migrations");
+    sqlx::migrate!("./src/migrations").run(&pool).await.expect("Failed to run migrations.");
 
     // === SESSION STORE ===
     let session_store = PostgresStore::new(pool.clone());
@@ -31,6 +35,13 @@ async fn main() -> anyhow::Result<()> {
         .with_same_site(SameSite::Strict)
         .with_expiry(Expiry::OnInactivity(time::Duration::days(1)));
 
+    // === CORS ===
+    let cors = CorsLayer::new()
+        .allow_credentials(true)
+        .allow_headers([CONTENT_TYPE, HeaderName::from_static("x-csrf-token")])
+        .allow_methods([Method::GET, Method::POST])
+        .allow_origin(HeaderValue::from_static("http://localhost:3000"));
+
     // === ROUTES ===
     let app = Router::new()
         // Frontend routes
@@ -44,7 +55,7 @@ async fn main() -> anyhow::Result<()> {
         // Middlewares
         .layer(middleware::from_fn(csrf_middleware))
         .layer(session_layer)
-        .layer(CorsLayer::permissive())
+        .layer(cors)
         .with_state(pool);
 
     let address = "0.0.0.0:3000";
@@ -52,7 +63,9 @@ async fn main() -> anyhow::Result<()> {
 
     println!("listening on http://{address}");
     // Ensure we use a shutdown signal to abort the deletion task.
-    axum::serve(listener, app).with_graceful_shutdown(shutdown_signal(deletion_task.abort_handle())).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal(deletion_task.abort_handle()))
+        .await?;
 
     deletion_task.await??;
 
@@ -74,7 +87,10 @@ async fn shutdown_signal(deletion_task_abort_handle: AbortHandle) {
 
     #[cfg(unix)]
     let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate()).expect("Failed to install signal handler").recv().await;
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("Failed to install signal handler")
+            .recv()
+            .await;
     };
 
     #[cfg(not(unix))]

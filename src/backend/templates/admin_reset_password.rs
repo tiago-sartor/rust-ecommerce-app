@@ -13,7 +13,7 @@ pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) ->
                 // Form
                 <div class="flex flex-col flex-1 w-full">
                     <div class="w-full max-w-md pt-10 mx-auto">
-                        <a href="/admin/login" class="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-800">
+                        <a href="/admin/login" class="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-750">
                             <svg class="size-4.5" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.5" "stroke"="currentColor">
                                 <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"></path>
                             </svg>
@@ -22,7 +22,7 @@ pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) ->
                     </div>
                     <div class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
                         <div class="mb-5 sm:mb-8">
-                            <h1 class="mb-2 font-semibold text-neutral-800 text-3xl sm:text-4xl">
+                            <h1 class="mb-2 font-semibold text-3xl sm:text-4xl">
                                 "Reset Password"
                             </h1>
                             <p class="text-sm text-neutral-500">
@@ -34,14 +34,14 @@ pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) ->
                             <div class="space-y-5">
                                 // New Password
                                 <div>
-                                    <label for="password" class="mb-1.5 block text-sm font-medium text-neutral-700">
+                                    <label for="password" class="mb-1.5 block text-sm font-medium text-neutral-750">
                                         "New Password"
                                         <span class="text-red-600" aria-hidden="true">"*"</span>
                                     </label>
                                     <div x-data="{ showPassword: false }" class="relative">
                                         <input
                                             x-bind:type="showPassword ? 'text' : 'password'"
-                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                             id="password"
                                             name="password"
                                             value=(ctx.payload.password)
@@ -84,14 +84,14 @@ pub fn admin_reset_password_template(ctx: &Context<ResetPasswordPayload, ()>) ->
                                 </div>
                                 // Confirm Password
                                 <div>
-                                    <label for="confirm_password" class="mb-1.5 block text-sm font-medium text-neutral-700">
+                                    <label for="confirm_password" class="mb-1.5 block text-sm font-medium text-neutral-750">
                                         "Confirm New Password"
                                         <span class="text-red-600" aria-hidden="true">"*"</span>
                                     </label>
                                     <div x-data="{ showPassword: false }" class="relative">
                                         <input
                                             x-bind:type="showPassword ? 'text' : 'password'"
-                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                            class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                             id="confirm_password"
                                             name="confirm_password"
                                             value=(ctx.payload.confirm_password)

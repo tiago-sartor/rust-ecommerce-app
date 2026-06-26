@@ -35,7 +35,7 @@ pub fn protected_admin_routes(pool: PgPool) -> Router<PgPool> {
             .route("/order-details/{id}", get(backend::admin_order_details))
             .route("/customers", get(backend::admin_customers))
             .route("/add-customer", get(backend::admin_add_customer_get).post(backend::admin_add_customer_post))
-            //.route("/customer-details/{id}", get(backend::admin_customer_details))
+            .route("/customer-details/{id}", get(backend::admin_customer_details))
             .route("/products", get(backend::admin_products))
             .route("/add-product", get(backend::admin_add_product))
             .route("/edit-product/{id}", get(backend::admin_edit_product))

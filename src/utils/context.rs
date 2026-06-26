@@ -1,5 +1,5 @@
 use crate::middlewares::csrf::CsrfToken;
-use crate::models::{admin::Admin, customer::Customer, product::Product};
+use crate::models::{Address, Admin, Customer, Product, Order};
 use axum::extract::Form;
 use std::collections::HashMap;
 
@@ -7,8 +7,9 @@ pub struct Context<P = (), D = ()> {
     pub admin: Option<Admin>,
     pub customer: Option<Customer>,
     pub product: Option<Product>,
+    pub address: Option<Address>,
     // pub cart: Option<Cart>,
-    // pub order: Option<Order>,
+    pub order: Option<Order>,
     pub csrf_token: CsrfToken,
     pub payload: Form<P>,
     pub data: D,
@@ -21,9 +22,10 @@ impl<P: Default, D: Default> Context<P, D> {
         Context {
             admin: None,
             customer: None,
+            address: None,
             product: None,
             // cart: None,
-            // order: None,
+            order: None,
             csrf_token: CsrfToken(String::new()),
             payload: Form(P::default()),
             data: D::default(),

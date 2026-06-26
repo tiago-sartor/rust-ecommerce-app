@@ -13,7 +13,7 @@ pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable 
                 // Form
                 <div class="flex flex-col flex-1 w-full">
                     <div class="w-full max-w-md pt-10 mx-auto">
-                        <a href="/" class="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-800">
+                        <a href="/" class="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-750">
                             <svg class="size-4.5" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.5" "stroke"="currentColor">
                                 <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"></path>
                             </svg>
@@ -24,7 +24,7 @@ pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable 
                         <div>
                             <div class="mb-5 sm:mb-8">
                                 <h1
-                                    class="mb-2 font-semibold text-neutral-800 text-3xl sm:text-4xl">
+                                    class="mb-2 font-semibold text-3xl sm:text-4xl">
                                     "Login"
                                 </h1>
                                 <p class="text-sm text-neutral-500">
@@ -33,7 +33,7 @@ pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable 
                             </div>
                             <div>
                                 <button
-                                    class="flex items-center justify-center gap-3 w-full py-3 text-sm font-medium text-neutral-600 transition bg-neutral-100 rounded-lg px-7 hover:bg-neutral-200 hover:text-neutral-800 hover:shadow-xs">
+                                    class="flex items-center justify-center gap-3 w-full py-3 text-sm font-medium text-neutral-600 transition bg-neutral-100 rounded-lg px-7 hover:bg-neutral-200 hover:text-neutral-750 hover:shadow-xs">
                                     <svg "width"="20" "height"="20" "viewBox"="0 0 20 20" "fill"="none">
                                         <path "d"="M18.7511 10.1944C18.7511 9.47495 18.6915 8.94995 18.5626 8.40552H10.1797V11.6527H15.1003C15.0011 12.4597 14.4654 13.675 13.2749 14.4916L13.2582 14.6003L15.9087 16.6126L16.0924 16.6305C17.7788 15.1041 18.7511 12.8583 18.7511 10.1944Z" "fill"="#4285F4"></path>
                                         <path "d"="M10.1788 18.75C12.5895 18.75 14.6133 17.9722 16.0915 16.6305L13.274 14.4916C12.5201 15.0068 11.5081 15.3666 10.1788 15.3666C7.81773 15.3666 5.81379 13.8402 5.09944 11.7305L4.99473 11.7392L2.23868 13.8295L2.20264 13.9277C3.67087 16.786 6.68674 18.75 10.1788 18.75Z" "fill"="#34A853"></path>
@@ -59,12 +59,12 @@ pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable 
                                         // Email
                                         <div>
                                             <label
-                                                class="mb-1.5 block text-sm font-medium text-neutral-700">
+                                                class="mb-1.5 block text-sm font-medium text-neutral-750">
                                                 "E-mail"
                                                 <span class="text-red-600" aria-hidden="true">"*"</span>
                                             </label>
                                             <input
-                                                class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                                class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                                 type="email"
                                                 id="email"
                                                 name="email"
@@ -79,14 +79,14 @@ pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable 
                                         // Password
                                         <div>
                                             <label
-                                                class="mb-1.5 block text-sm font-medium text-neutral-700">
+                                                class="mb-1.5 block text-sm font-medium text-neutral-750">
                                                 "Password"
                                                 <span class="text-red-600" aria-hidden="true">"*"</span>
                                             </label>
                                             <div x-data="{ showPassword: false }" class="relative">
                                                 <input
                                                     x-bind:type="showPassword ? 'text' : 'password'"
-                                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent py-2.5 pl-4 pr-11 text-sm shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                                     id="password"
                                                     name="password"
                                                     placeholder="Enter your password"
@@ -127,7 +127,7 @@ pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable 
                                         // Checkbox
                                         <div class="flex items-center justify-between">
                                             <div x-data="{ checkboxToggle: false }">
-                                                <label for="checkboxLabelOne" class="flex items-center gap-2 text-sm font-normal text-neutral-800 cursor-pointer select-none">
+                                                <label for="checkboxLabelOne" class="flex items-center gap-2 text-sm font-normal cursor-pointer select-none">
                                                     <div class="relative">
                                                         <input x-on:change="checkboxToggle = !checkboxToggle" type="checkbox" id="checkboxLabelOne" class="sr-only" />
                                                         <div
@@ -143,7 +143,7 @@ pub fn admin_login_template(ctx: &Context<LoginPayload, ()>) -> impl Renderable 
                                                     "Keep me logged in"
                                                 </label>
                                             </div>
-                                            <a href="/admin/forgot-password" class="text-sm underline decoration-transparent underline-offset-4 transition-colors text-neutral-800 hover:decoration-neutral-800">
+                                            <a href="/admin/forgot-password" class="text-sm underline decoration-transparent underline-offset-4 transition-colors hover:decoration-neutral-800">
                                                 "Forgot password?"
                                             </a>
                                         </div>

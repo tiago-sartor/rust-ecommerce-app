@@ -34,9 +34,29 @@ impl Default for Address {
 }
 
 impl Address {
-    pub async fn get_by_customer_id(customer_id: i64, pool: &sqlx::PgPool) -> Result<Vec<Self>, sqlx::Error> {
-        // Simulate fetching addresses for a customer from a database
-        Ok(vec![])
+    pub async fn get_by_customer_id(customer_id: &i64, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
+       sqlx::query_as!(
+            Self,
+            r#"
+            SELECT
+                id,
+                customer_id,
+                street,
+                number,
+                complement,
+                neighborhood,
+                city,
+                state as "state!: BrazilianStates",
+                postcode,
+                created_at as "created_at!: OffsetDateTime",
+                updated_at as "updated_at!: OffsetDateTime"
+            FROM addresses
+            WHERE customer_id = $1
+            "#,
+            customer_id
+        )
+        .fetch_optional(pool)
+        .await
     }
 
     pub async fn create_address(address: Address, pool: &sqlx::PgPool) -> Result<Self, sqlx::Error> {

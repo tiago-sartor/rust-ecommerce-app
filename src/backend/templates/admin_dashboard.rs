@@ -19,7 +19,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                             <div class="mt-5 flex items-end justify-between">
                                 <div>
                                     <span class="text-sm text-neutral-500">"Customers"</span>
-                                    <h4 class="mt-2 text-3xl font-bold text-neutral-800 ">
+                                    <h4 class="mt-2 text-3xl font-bold ">
                                         "3,782"
                                     </h4>
                                 </div>
@@ -46,7 +46,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                             <div class="mt-5 flex items-end justify-between">
                                 <div>
                                     <span class="text-sm text-neutral-500 ">Orders</span>
-                                    <h4 class="mt-2 text-3xl font-bold text-neutral-800 ">
+                                    <h4 class="mt-2 text-3xl font-bold ">
                                         "5,359"
                                     </h4>
                                 </div>
@@ -68,23 +68,23 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                     // Chart One Start
                     <div class="overflow-hidden rounded-2xl border border-neutral-200 bg-white px-5 pt-5   sm:px-6 sm:pt-6">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-neutral-800 ">
+                            <h3 class="text-lg font-semibold ">
                                 "Monthly Sales"
                             </h3>
 
                             <div x-data="{openDropDown: false}" class="relative h-fit">
                                 <button x-on:click="openDropDown = !openDropDown"
-                                    x-bind:class="openDropDown ? 'text-neutral-700 ' : 'text-neutral-400 hover:text-neutral-700 '">
+                                    x-bind:class="openDropDown ? 'text-neutral-750 ' : 'text-neutral-400 hover:text-neutral-750 '">
                                     <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                                         <path "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z" "fill"=""></path>
                                     </svg>
                                 </button>
                                 <div x-show="openDropDown" x-on:click.outside="openDropDown = false"
                                     class="absolute right-0 z-40 w-40 p-2 space-y-1 bg-white border border-neutral-200 top-full rounded-2xl shadow-theme-lg  ">
-                                    <button class="flex w-full px-3 py-2 font-medium text-left text-neutral-500 rounded-lg text-xs hover:bg-neutral-100 hover:text-neutral-700   ">
+                                    <button class="flex w-full px-3 py-2 font-medium text-left text-neutral-500 rounded-lg text-xs hover:bg-neutral-100 hover:text-neutral-750   ">
                                         "View More"
                                     </button>
-                                    <button class="flex w-full px-3 py-2 font-medium text-left text-neutral-500 rounded-lg text-xs hover:bg-neutral-100 hover:text-neutral-700   ">
+                                    <button class="flex w-full px-3 py-2 font-medium text-left text-neutral-500 rounded-lg text-xs hover:bg-neutral-100 hover:text-neutral-750   ">
                                         "Delete"
                                     </button>
                                 </div>
@@ -105,7 +105,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                         <div class="shadow-default rounded-2xl bg-white px-5 pb-11 pt-5  sm:px-6 sm:pt-6">
                             <div class="flex justify-between">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-neutral-800 ">
+                                    <h3 class="text-lg font-semibold ">
                                         "Monthly Target"
                                     </h3>
                                     <p class="mt-1 text-sm text-neutral-500 ">
@@ -114,17 +114,17 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                 </div>
                                 <div x-data="{openDropDown: false}" class="relative h-fit">
                                     <button x-on:click="openDropDown = !openDropDown"
-                                        x-bind:class="openDropDown ? 'text-neutral-700 ' : 'text-neutral-400 hover:text-neutral-700 '">
+                                        x-bind:class="openDropDown ? 'text-neutral-750 ' : 'text-neutral-400 hover:text-neutral-750 '">
                                         <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                                             <path "fill"="" "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"></path>
                                         </svg>
                                     </button>
                                     <div x-show="openDropDown" x-on:click.outside="openDropDown = false"
                                         class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-neutral-200 bg-white p-2 shadow-theme-lg  ">
-                                        <button class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700   ">
+                                        <button class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-750   ">
                                             "View More"
                                         </button>
-                                        <button class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700   ">
+                                        <button class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-750   ">
                                             "Delete"
                                         </button>
                                     </div>
@@ -146,7 +146,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                 <p class="mb-1 text-center text-xs text-neutral-500  sm:text-sm">
                                     "Target"
                                 </p>
-                                <p class="flex items-center justify-center gap-1 text-base font-semibold text-neutral-800  sm:text-lg">
+                                <p class="flex items-center justify-center gap-1 text-base font-semibold  sm:text-lg">
                                     "$20K"
                                     <svg "width"="16" "height"="16" "viewBox"="0 0 16 16" "fill"="none">
                                         <path "fill"="#D92D20" "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M7.26816 13.6632C7.4056 13.8192 7.60686 13.9176 7.8311 13.9176C7.83148 13.9176 7.83187 13.9176 7.83226 13.9176C8.02445 13.9178 8.21671 13.8447 8.36339 13.6981L12.3635 9.70076C12.6565 9.40797 12.6567 8.9331 12.3639 8.6401C12.0711 8.34711 11.5962 8.34694 11.3032 8.63973L8.5811 11.36L8.5811 2.5C8.5811 2.08579 8.24531 1.75 7.8311 1.75C7.41688 1.75 7.0811 2.08579 7.0811 2.5L7.0811 11.3556L4.36354 8.63975C4.07055 8.34695 3.59568 8.3471 3.30288 8.64009C3.01008 8.93307 3.01023 9.40794 3.30321 9.70075L7.26816 13.6632Z"></path>
@@ -160,7 +160,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                 <p class="mb-1 text-center text-xs text-neutral-500  sm:text-sm">
                                     "Revenue"
                                 </p>
-                                <p class="flex items-center justify-center gap-1 text-base font-semibold text-neutral-800  sm:text-lg">
+                                <p class="flex items-center justify-center gap-1 text-base font-semibold  sm:text-lg">
                                     "$20K"
                                     <svg "width"="16" "height"="16" "viewBox"="0 0 16 16" "fill"="none">
                                         <path "fill"="#039855" "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M7.60141 2.33683C7.73885 2.18084 7.9401 2.08243 8.16435 2.08243C8.16475 2.08243 8.16516 2.08243 8.16556 2.08243C8.35773 2.08219 8.54998 2.15535 8.69664 2.30191L12.6968 6.29924C12.9898 6.59203 12.9899 7.0669 12.6971 7.3599C12.4044 7.6529 11.9295 7.65306 11.6365 7.36027L8.91435 4.64004L8.91435 13.5C8.91435 13.9142 8.57856 14.25 8.16435 14.25C7.75013 14.25 7.41435 13.9142 7.41435 13.5L7.41435 4.64442L4.69679 7.36025C4.4038 7.65305 3.92893 7.6529 3.63613 7.35992C3.34333 7.06693 3.34348 6.59206 3.63646 6.29926L7.60141 2.33683Z"></path>
@@ -174,7 +174,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                 <p class="mb-1 text-center text-xs text-neutral-500  sm:text-sm">
                                     "Today"
                                 </p>
-                                <p class="flex items-center justify-center gap-1 text-base font-semibold text-neutral-800  sm:text-lg">
+                                <p class="flex items-center justify-center gap-1 text-base font-semibold  sm:text-lg">
                                     "$20K"
                                     <svg "width"="16" "height"="16" "viewBox"="0 0 16 16" "fill"="none">
                                         <path "fill-rule"="evenodd" "clip-rule"="evenodd"
@@ -193,7 +193,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                     <div class="rounded-2xl border border-neutral-200 bg-white px-5 pb-5 pt-5   sm:px-6 sm:pt-6">
                         <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:justify-between">
                             <div class="w-full">
-                                <h3 class="text-lg font-semibold text-neutral-800 ">
+                                <h3 class="text-lg font-semibold ">
                                     "Statistics"
                                 </h3>
                                 <p class="mt-1 text-neutral-500 text-sm ">
@@ -223,10 +223,10 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
 
                                 <div class="relative w-fit">
                                     <input
-                                        class="datepicker h-10 w-full max-w-11 rounded-lg border border-neutral-200 bg-white py-2.5 pl-[34px] pr-4 text-sm font-medium text-neutral-700 shadow-theme-xs focus:outline-hidden focus:ring-0 focus-visible:outline-hidden    xl:max-w-fit xl:pl-11"
+                                        class="datepicker h-10 w-full max-w-11 rounded-lg border border-neutral-200 bg-white py-2.5 pl-[34px] pr-4 text-sm font-medium text-neutral-750 shadow-theme-xs focus:outline-hidden focus:ring-0 focus-visible:outline-hidden    xl:max-w-fit xl:pl-11"
                                         placeholder="Select dates" data-class="flatpickr-right" readonly="readonly" />
                                     <div class="absolute inset-0 right-auto flex items-center pointer-events-none left-4">
-                                        <svg class="fill-neutral-700 " "width"="20" "height"="20" "viewBox"="0 0 20 20" "fill"="none">
+                                        <svg class="fill-neutral-750 " "width"="20" "height"="20" "viewBox"="0 0 20 20" "fill"="none">
                                             <path "fill-rule"="evenodd" "clip-rule"="evenodd"
                                                 "d"="M6.66683 1.54199C7.08104 1.54199 7.41683 1.87778 7.41683 2.29199V3.00033H12.5835V2.29199C12.5835 1.87778 12.9193 1.54199 13.3335 1.54199C13.7477 1.54199 14.0835 1.87778 14.0835 2.29199V3.00033L15.4168 3.00033C16.5214 3.00033 17.4168 3.89576 17.4168 5.00033V7.50033V15.8337C17.4168 16.9382 16.5214 17.8337 15.4168 17.8337H4.5835C3.47893 17.8337 2.5835 16.9382 2.5835 15.8337V7.50033V5.00033C2.5835 3.89576 3.47893 3.00033 4.5835 3.00033L5.91683 3.00033V2.29199C5.91683 1.87778 6.25262 1.54199 6.66683 1.54199ZM6.66683 4.50033H4.5835C4.30735 4.50033 4.0835 4.72418 4.0835 5.00033V6.75033H15.9168V5.00033C15.9168 4.72418 15.693 4.50033 15.4168 4.50033H13.3335H6.66683ZM15.9168 8.25033H4.0835V15.8337C4.0835 16.1098 4.30735 16.3337 4.5835 16.3337H15.4168C15.693 16.3337 15.9168 16.1098 15.9168 15.8337V8.25033Z"
                                                 "fill"=""></path>
@@ -247,7 +247,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                     <div class="rounded-2xl border border-neutral-200 bg-white p-5   sm:p-6">
                         <div class="flex justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold text-neutral-800 ">
+                                <h3 class="text-lg font-semibold ">
                                     "Customers Demographic"
                                 </h3>
                                 <p class="mt-1 text-sm text-neutral-500 ">
@@ -257,7 +257,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
 
                             <div x-data="{openDropDown: false}" class="relative h-fit">
                                 <button x-on:click="openDropDown = !openDropDown"
-                                    x-bind:class="openDropDown ? 'text-neutral-700 ' : 'text-neutral-400 hover:text-neutral-700 '">
+                                    x-bind:class="openDropDown ? 'text-neutral-750 ' : 'text-neutral-400 hover:text-neutral-750 '">
                                     <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                                         <path "fill-rule"="evenodd" "clip-rule"="evenodd"
                                             "d"="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
@@ -267,11 +267,11 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                 <div x-show="openDropDown" x-on:click.outside="openDropDown = false"
                                     class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-neutral-200 bg-white p-2 shadow-theme-lg  ">
                                     <button
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700   ">
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-750   ">
                                         "View More"
                                     </button>
                                     <button
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700   ">
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-neutral-500 hover:bg-neutral-100 hover:text-neutral-750   ">
                                         "Delete"
                                     </button>
                                 </div>
@@ -290,7 +290,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                         <img src="src/images/country/country-01.svg" alt="usa" />
                                     </div>
                                     <div>
-                                        <p class="text-sm font-semibold text-neutral-800 ">
+                                        <p class="text-sm font-semibold ">
                                             "USA"
                                         </p>
                                         <span class="block text-xs text-neutral-500 ">
@@ -305,7 +305,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                             class="absolute left-0 top-0 flex h-full w-[79%] items-center justify-center rounded-sm bg-brand-500 text-xs font-medium text-white">
                                         </div>
                                     </div>
-                                    <p class="text-sm font-medium text-neutral-800 ">
+                                    <p class="text-sm font-medium ">
                                         "79%"
                                     </p>
                                 </div>
@@ -317,7 +317,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                         <img src="src/images/country/country-02.svg" alt="france" />
                                     </div>
                                     <div>
-                                        <p class="text-sm font-semibold text-neutral-800 ">
+                                        <p class="text-sm font-semibold ">
                                             "France"
                                         </p>
                                         <span class="block text-xs text-neutral-500 ">
@@ -332,7 +332,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                             class="absolute left-0 top-0 flex h-full w-[23%] items-center justify-center rounded-sm bg-brand-500 text-xs font-medium text-white">
                                         </div>
                                     </div>
-                                    <p class="text-sm font-medium text-neutral-800 ">
+                                    <p class="text-sm font-medium ">
                                         "23%"
                                     </p>
                                 </div>
@@ -347,14 +347,14 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                     <div class="overflow-hidden rounded-2xl border border-neutral-200 bg-white px-4 pb-3 pt-4   sm:px-6">
                         <div class="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold text-neutral-800 ">
+                                <h3 class="text-lg font-semibold ">
                                     "Recent Orders"
                                 </h3>
                             </div>
 
                             <div class="flex items-center gap-3">
                                 <button
-                                    class="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 shadow-theme-xs hover:bg-neutral-50 hover:text-neutral-800     ">
+                                    class="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-750 shadow-theme-xs hover:bg-neutral-50">
                                     <svg class="stroke-current fill-white " "width"="20" "height"="20" "viewBox"="0 0 20 20"
                                         "fill"="none">
                                         <path "d"="M2.29004 5.90393H17.7067" "stroke"="" "stroke-width"="1.5" "stroke-linecap"="round"
@@ -373,7 +373,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                 </button>
 
                                 <button
-                                    class="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 shadow-theme-xs hover:bg-neutral-50 hover:text-neutral-800     ">
+                                    class="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-750 shadow-theme-xs hover:bg-neutral-50">
                                     "See all"
                                 </button>
                             </div>
@@ -425,7 +425,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                                         <img src="src/images/product/product-01.jpg" alt="Product" />
                                                     </div>
                                                     <div>
-                                                        <p class="font-medium text-neutral-800 text-sm ">
+                                                        <p class="font-medium text-sm ">
                                                             "Macbook pro 13\""
                                                         </p>
                                                         <span class="text-neutral-500 text-xs ">
@@ -466,7 +466,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                                         <img src="src/images/product/product-02.jpg" alt="Product" />
                                                     </div>
                                                     <div>
-                                                        <p class="font-medium text-neutral-800 text-sm ">
+                                                        <p class="font-medium text-sm ">
                                                             "Apple Watch Ultra"
                                                         </p>
                                                         <span class="text-neutral-500 text-xs ">
@@ -508,7 +508,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                                         <img src="src/images/product/product-03.jpg" alt="Product" />
                                                     </div>
                                                     <div>
-                                                        <p class="font-medium text-neutral-800 text-sm ">
+                                                        <p class="font-medium text-sm ">
                                                             "iPhone 15 Pro Max"
                                                         </p>
                                                         <span class="text-neutral-500 text-xs ">
@@ -550,7 +550,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                                         <img src="src/images/product/product-04.jpg" alt="Product" />
                                                     </div>
                                                     <div>
-                                                        <p class="font-medium text-neutral-800 text-sm ">
+                                                        <p class="font-medium text-sm ">
                                                             "iPad Pro 3rd Gen"
                                                         </p>
                                                         <span class="text-neutral-500 text-xs ">
@@ -592,7 +592,7 @@ pub fn admin_dashboard_template(ctx: &Context) -> impl Renderable {
                                                         <img src="src/images/product/product-05.jpg" alt="Product" />
                                                     </div>
                                                     <div>
-                                                        <p class="font-medium text-neutral-800 text-sm ">
+                                                        <p class="font-medium text-sm ">
                                                             "Airpods Pro 2nd Gen"
                                                         </p>
                                                         <span class="text-neutral-500 text-xs ">

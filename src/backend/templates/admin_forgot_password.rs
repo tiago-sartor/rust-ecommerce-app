@@ -13,7 +13,7 @@ pub fn admin_forgot_password_template(ctx: &Context<ForgotPasswordPayload, ()>) 
                 <div class="flex flex-col flex-1 w-full">
                     <div class="w-full max-w-md pt-10 mx-auto">
                         <a href="/admin/login"
-                            class="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-800">
+                            class="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-750">
                             <svg class="size-4.5" "fill"="none" "viewBox"="0 0 24 24" "stroke-width"="1.5" "stroke"="currentColor">
                                 <path "stroke-linecap"="round" "stroke-linejoin"="round" "d"="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"></path>
                             </svg>
@@ -22,7 +22,7 @@ pub fn admin_forgot_password_template(ctx: &Context<ForgotPasswordPayload, ()>) 
                     </div>
                     <div class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
                         <div class="mb-5 sm:mb-8">
-                            <h1 class="mb-2 font-semibold text-neutral-800 text-3xl sm:text-4xl">
+                            <h1 class="mb-2 font-semibold text-3xl sm:text-4xl">
                                 "Forgot Password?"
                             </h1>
                             <p class="text-sm text-neutral-500">
@@ -34,12 +34,12 @@ pub fn admin_forgot_password_template(ctx: &Context<ForgotPasswordPayload, ()>) 
                             <div class="space-y-5">
                                 // Email
                                 <div>
-                                    <label class="mb-1.5 block text-sm font-medium text-neutral-700">
+                                    <label class="mb-1.5 block text-sm font-medium text-neutral-750">
                                         "E-mail"
                                         <span class="text-red-600" aria-hidden="true">"*"</span>
                                     </label>
                                     <input
-                                        class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
+                                        class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent px-4 py-2.5 text-sm shadow-xs placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-hidden focus:ring-3 focus:ring-neutral-200/70"
                                         type="email"
                                         id="email"
                                         name="email"

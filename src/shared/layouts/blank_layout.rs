@@ -19,8 +19,6 @@ pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
             <link href="/assets/favicon.webp" rel="icon" type="image/webp">
             // CSS
             <link href="/assets/css/admin.css" rel="stylesheet" type="text/css">
-            // AlpineJS
-            <script defer src="/assets/js/app.js"></script>
 
             // Render optional scripts if they exist
             @if let Some(s) = &scripts {
@@ -28,6 +26,9 @@ pub fn blank_layout<P, D>(title: &str, content: impl Renderable, ctx: &Context<P
                     <script defer src=(format!("/assets/js/{script}.js"))></script>
                 }
             }
+
+            // AlpineJS
+            <script defer src="/assets/js/app.js"></script>
         </head>
 
         <body>

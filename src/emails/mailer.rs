@@ -24,7 +24,7 @@ pub struct EmailLog {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, sqlx::Type)]
-#[sqlx(type_name = "emaillogstatus", rename_all = "lowercase")]
+#[sqlx(rename_all = "lowercase")]
 pub enum Status {
     Sent,
     Failed,
@@ -137,13 +137,13 @@ impl Mailer {
     }
 
     pub async fn get_logs_paginated(page: i64, limit: i64, filter_by: &Option<Status>, pool: &PgPool) -> Result<(Vec<EmailLog>, i64), EmailError> {
-        let offset = (page - 1) * limit;
+        let offset = (page - 1).checked_mul(limit).unwrap_or(0);
         let logs = sqlx::query_as!(
             EmailLog,
             r#"
-            SELECT id, recipient, subject, status as "status: Status", html, response as "response!", sent_at as "sent_at!: OffsetDateTime"
+            SELECT id, recipient, subject, status as "status: Status", html, response, sent_at as "sent_at!: OffsetDateTime"
             FROM email_logs
-            WHERE ($3::emaillogstatus IS NULL OR status = $3)
+            WHERE ($3::TEXT IS NULL OR status = $3)
             ORDER BY sent_at DESC
             LIMIT $1 OFFSET $2
             "#,
@@ -158,7 +158,7 @@ impl Mailer {
             r#"
             SELECT COUNT(*) as "count!"
             FROM email_logs
-            WHERE ($1::emaillogstatus IS NULL OR status = $1)
+            WHERE ($1::TEXT IS NULL OR status = $1)
             "#,
             &filter_by as &Option<Status>
         )
@@ -172,7 +172,7 @@ impl Mailer {
     pub async fn get_log_details(id: i64, pool: &PgPool) -> Result<serde_json::Value, EmailError> {
         let record = sqlx::query!(
             r#"
-            SELECT html, response as "response!"
+            SELECT html, response
             FROM email_logs
             WHERE id = $1
             "#,

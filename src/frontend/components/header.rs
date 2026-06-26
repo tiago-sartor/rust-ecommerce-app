@@ -34,7 +34,7 @@ pub fn header(ctx: &Context) -> impl Renderable {
         //                     <button
         //                         x-on:click="open = !open"
         //                         type="button"
-        //                         class="-ml-2 bg-white p-2 text-neutral-800 hover:text-neutral-600">
+        //                         class="-ml-2 bg-white p-2 hover:text-neutral-600">
         //                         <span class="sr-only">Abrir menu</span>
         //                         <svg class="size-8" fill="none" viewBox="0 0 24 24" stroke-width="1.25" stroke="currentColor" aria-hidden="true">
         //                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -64,7 +64,7 @@ pub fn header(ctx: &Context) -> impl Renderable {
         //                             <?php $menu_locations = get_nav_menu_locations(); ?>
 
         //                             <div class="col-span-3">
-        //                                 <h3 class="pb-2 font-semibold tracking-wide text-neutral-700 border-b border-neutral-300">
+        //                                 <h3 class="pb-2 font-semibold tracking-wide text-neutral-750 border-b border-neutral-300">
         //                                     MÓVEIS
         //                                 </h3>
         //                                 <ul class="mt-3 flex flex-col flex-wrap h-55">
@@ -85,7 +85,7 @@ pub fn header(ctx: &Context) -> impl Renderable {
         //                                 </ul>
         //                             </div>
         //                             <div>
-        //                                 <h3 class="pb-2 font-semibold tracking-wide text-neutral-700 border-b border-neutral-300">
+        //                                 <h3 class="pb-2 font-semibold tracking-wide text-neutral-750 border-b border-neutral-300">
         //                                     DECORAÇÃO
         //                                 </h3>
         //                                 <ul class="mt-3 flex flex-col">
@@ -106,7 +106,7 @@ pub fn header(ctx: &Context) -> impl Renderable {
         //                                 </ul>
         //                             </div>
         //                             <div>
-        //                                 <h3 class="pb-2 font-semibold tracking-wide text-neutral-700 border-b border-neutral-300">
+        //                                 <h3 class="pb-2 font-semibold tracking-wide text-neutral-750 border-b border-neutral-300">
         //                                     ILUMINAÇÃO
         //                                 </h3>
         //                                 <ul class="mt-3 flex flex-col">
@@ -126,7 +126,7 @@ pub fn header(ctx: &Context) -> impl Renderable {
         //                                     ?>
         //                                 </ul>
         //                             </div>
-        //                             <div class="flex flex-col justify-between text-neutral-800">
+        //                             <div class="flex flex-col justify-between">
         //                                 <div class="space-y-4">
         //                                     <h4 x-data="{open: false}" class="relative flex">
         //                                         <button
@@ -166,7 +166,7 @@ pub fn header(ctx: &Context) -> impl Renderable {
 
         //                 <div class="flex items-center justify-end gap-4 sm:gap-6">
         //                     <!-- Sign In / Create Account Links -->
-        //                     <div class="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6 text-sm text-neutral-800 hover:text-neutral-500">
+        //                     <div class="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6 text-sm hover:text-neutral-500">
         //                         <?php if (!is_user_logged_in()) : ?>
         //                             <a href="<?php echo esc_url(wc_get_page_permalink('myaccount') . '#login'); ?>" role="button"><?php esc_html_e('Login', 'woocommerce'); ?></a>
         //                             <span class="h-6 w-px bg-neutral-200" aria-hidden="true"></span>

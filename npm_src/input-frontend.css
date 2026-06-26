@@ -19,6 +19,8 @@
   --color-gold-800: hsl(40, 35%, 40%);
   --color-gold-900: hsl(40, 35%, 32.5%);
 
+  --color-neutral-750: #333333;
+
   /* Create a new custom breakpoint of 90rem (1440px) */
   --breakpoint-1440px: 90rem;
   --container-1440px: 90rem;
@@ -27,7 +29,7 @@
 @layer base {
 
   html {
-    @apply text-base text-gray-800;
+    @apply text-base font-normal text-neutral-750;
   }
 
   button:not(:disabled),

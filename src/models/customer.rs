@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{PgPool, types::Decimal};
 use time::OffsetDateTime;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -16,11 +16,24 @@ pub struct Customer {
     pub company_name: Option<String>,
     pub state_registration: Option<String>,
     pub is_subscribed: bool,
-    pub last_login: Option<OffsetDateTime>,
+    pub last_active_at: Option<OffsetDateTime>,
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
     pub reset_token: Option<String>,
     pub reset_expires_at: Option<OffsetDateTime>,
+}
+
+#[derive(Debug)]
+pub struct CustomerSummary {
+    pub id: i64,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub is_subscribed: bool,
+    pub total_orders: i64,
+    pub total_spent: Decimal,
+    // This is an Option because MAX() or a LEFT JOIN with 0 orders can return NULL
+    pub last_order_at: Option<OffsetDateTime>,
 }
 
 impl Default for Customer {
@@ -38,7 +51,7 @@ impl Default for Customer {
             company_name: None,
             state_registration: None,
             is_subscribed: false,
-            last_login: None,
+            last_active_at: None,
             created_at: OffsetDateTime::UNIX_EPOCH,
             updated_at: OffsetDateTime::UNIX_EPOCH,
             reset_token: None,
@@ -65,7 +78,7 @@ impl Customer {
                 company_name,
                 state_registration,
                 is_subscribed,
-                last_login as "last_login?: OffsetDateTime",
+                last_active_at as "last_active_at?: OffsetDateTime",
                 created_at as "created_at!: OffsetDateTime",
                 updated_at as "updated_at!: OffsetDateTime",
                 reset_token,
@@ -96,7 +109,7 @@ impl Customer {
                 company_name,
                 state_registration,
                 is_subscribed,
-                last_login as "last_login?: OffsetDateTime",
+                last_active_at as "last_active_at?: OffsetDateTime",
                 created_at as "created_at!: OffsetDateTime",
                 updated_at as "updated_at!: OffsetDateTime",
                 reset_token,
@@ -127,7 +140,7 @@ impl Customer {
                 company_name,
                 state_registration,
                 is_subscribed,
-                last_login as "last_login?: OffsetDateTime",
+                last_active_at as "last_active_at?: OffsetDateTime",
                 created_at as "created_at!: OffsetDateTime",
                 updated_at as "updated_at!: OffsetDateTime",
                 reset_token,
@@ -158,7 +171,7 @@ impl Customer {
                 company_name,
                 state_registration,
                 is_subscribed,
-                last_login as "last_login?: OffsetDateTime",
+                last_active_at as "last_active_at?: OffsetDateTime",
                 created_at as "created_at!: OffsetDateTime",
                 updated_at as "updated_at!: OffsetDateTime",
                 reset_token,
@@ -172,33 +185,25 @@ impl Customer {
         .await
     }
 
-    pub async fn get_paginated(page: i64, limit: i64, _order_by: &str, pool: &PgPool) -> Result<(Vec<Self>, i64), sqlx::Error> {
-        let offset = (page - 1) * limit;
-
+    pub async fn get_paginated(page: i64, limit: i64, _order_by: &str, pool: &PgPool) -> Result<(Vec<CustomerSummary>, i64), sqlx::Error> {
+        let offset = (page - 1).checked_mul(limit).unwrap_or(0);
         let customers = sqlx::query_as!(
-            Self,
+            CustomerSummary,
             r#"
             SELECT
-                id,
-                first_name,
-                last_name,
-                email,
-                password_hash,
-                phone,
-                profile_image_url,
-                cpf,
-                cnpj,
-                company_name,
-                state_registration,
-                is_subscribed,
-                last_login as "last_login?: OffsetDateTime",
-                created_at as "created_at!: OffsetDateTime",
-                updated_at as "updated_at!: OffsetDateTime",
-                reset_token,
-                reset_expires_at as "reset_expires_at?: OffsetDateTime"
+                customers.id,
+                customers.first_name,
+                customers.last_name,
+                customers.email,
+                customers.is_subscribed,
+                COUNT(orders.id) AS "total_orders!",
+                COALESCE(SUM(orders.total), 0) AS "total_spent!",
+                MAX(orders.created_at) AS last_order_at
             FROM customers
-            ORDER BY id DESC
-            LIMIT $1 OFFSET $2
+            LEFT JOIN orders ON orders.customer_id = customers.id
+            GROUP BY customers.id
+            ORDER BY customers.id DESC
+            LIMIT $1 OFFSET $2;
             "#,
             limit,
             offset
@@ -238,7 +243,7 @@ impl Customer {
                 company_name,
                 state_registration,
                 is_subscribed,
-                last_login as "last_login?: OffsetDateTime",
+                last_active_at as "last_active_at?: OffsetDateTime",
                 created_at as "created_at!: OffsetDateTime",
                 updated_at as "updated_at!: OffsetDateTime",
                 reset_token,
@@ -287,7 +292,7 @@ impl Customer {
                 company_name,
                 state_registration,
                 is_subscribed,
-                last_login as "last_login?: OffsetDateTime",
+                last_active_at as "last_active_at?: OffsetDateTime",
                 created_at as "created_at!: OffsetDateTime",
                 updated_at as "updated_at!: OffsetDateTime",
                 reset_token,

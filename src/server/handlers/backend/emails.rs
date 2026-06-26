@@ -1,12 +1,15 @@
 use crate::backend::{layouts::*, templates::*};
-use crate::emails::EmailLog;
-use crate::emails::mailer::{Mailer, Status};
+use crate::emails::{
+    EmailLog,
+    mailer::{Mailer, Status},
+};
 use crate::middlewares::csrf::CsrfToken;
-use crate::models::admin::Admin;
+use crate::models::{Admin, AdminRole};
 use crate::utils::{AppError, Context};
 use axum::{
     Form,
     extract::{Extension, Path, Query, State},
+    http::StatusCode,
     response::{IntoResponse, Json, Redirect},
 };
 use hypertext::Renderable;
@@ -32,13 +35,19 @@ pub async fn admin_emails(
     ctx.admin = Some(admin);
     ctx.csrf_token = csrf_token;
 
-    let page: i64 = params.get("page").and_then(|v| v.parse().ok().filter(|&v| v > 0)).unwrap_or(1);
-    let limit: i64 = params.get("limit").and_then(|v| v.parse().ok().filter(|&v| v > 9)).unwrap_or(10);
+    let page: i64 = params.get("page").and_then(|v| v.parse().ok()).map(|v: i64| v.clamp(1, 10_000)).unwrap_or(1);
+    let limit: i64 = params.get("limit").and_then(|v| v.parse().ok()).map(|v: i64| v.clamp(10, 100)).unwrap_or(10);
     let filter_by: Option<Status> = params.get("filter_by").and_then(|v| v.parse().ok());
 
     let (logs, count) = Mailer::get_logs_paginated(page, limit, &filter_by, &pool).await.unwrap_or_default();
 
-    ctx.data = Data { logs, count, page, limit, filter_by};
+    ctx.data = Data {
+        logs,
+        count,
+        page,
+        limit,
+        filter_by,
+    };
 
     let template = admin_emails_template(&ctx);
     let page_scripts = vec!["admin-checkbox-selector", "admin-action-dropdown"];
@@ -62,7 +71,11 @@ pub async fn admin_email_delete(Path(id): Path<i64>, State(pool): State<PgPool>)
     Ok(Redirect::to("/admin/emails"))
 }
 
-pub async fn admin_email_bulk_actions(State(pool): State<PgPool>, Form(payload): Form<HashMap<String, String>>) -> Result<impl IntoResponse, AppError> {
+pub async fn admin_email_bulk_actions(
+    Extension(admin): Extension<Admin>,
+    State(pool): State<PgPool>,
+    Form(payload): Form<HashMap<String, String>>,
+) -> Result<impl IntoResponse, AppError> {
     let action = payload.get("action").map(|s| s.as_str()).unwrap_or_default();
     let ids_json = payload.get("ids").map(|s| s.as_str()).unwrap_or("[]");
     let ids: Vec<i64> = serde_json::from_str(ids_json).unwrap_or_default();
@@ -74,11 +87,14 @@ pub async fn admin_email_bulk_actions(State(pool): State<PgPool>, Form(payload):
                 mailer.bulk_resend(&ids).await.map_err(|e| AppError::Internal(e.to_string()))?;
             }
             "delete" => {
+                if admin.role != AdminRole::Admin {
+                    return Ok(StatusCode::FORBIDDEN.into_response());
+                }
                 Mailer::bulk_delete(&ids, &pool).await.map_err(|e| AppError::Internal(e.to_string()))?;
             }
             _ => {}
         }
     }
 
-    Ok(Redirect::to("/admin/emails"))
+    Ok(Redirect::to("/admin/emails").into_response())
 }

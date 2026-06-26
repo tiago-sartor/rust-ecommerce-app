@@ -24,13 +24,13 @@ pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a
 
             <div x-on:click.outside="isProfileInfoModal = false" class="hide-scrollbar relative w-full max-w-2xl max-h-full overflow-y-auto rounded-3xl bg-white p-4 lg:p-11">
                 // close btn
-                <button x-on:click="isProfileInfoModal = false" class="transition-color absolute right-5 top-5 z-999 flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600 dark:bg-neutral-700 dark:bg-white/[0.05] dark:text-neutral-400 dark:hover:bg-white/[0.07] dark:hover:text-neutral-300">
+                <button x-on:click="isProfileInfoModal = false" class="transition-color absolute right-5 top-5 z-999 flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600 dark:bg-neutral-750 dark:bg-white/[0.05] dark:text-neutral-400 dark:hover:bg-white/[0.07] dark:hover:text-neutral-300">
                     <svg class="fill-current" "width"="24" "height"="24" "viewBox"="0 0 24 24" "fill"="none">
                         <path "fill"="" "fill-rule"="evenodd" "clip-rule"="evenodd" "d"="M6.04289 16.5418C5.65237 16.9323 5.65237 17.5655 6.04289 17.956C6.43342 18.3465 7.06658 18.3465 7.45711 17.956L11.9987 13.4144L16.5408 17.9565C16.9313 18.347 17.5645 18.347 17.955 17.9565C18.3455 17.566 18.3455 16.9328 17.955 16.5423L13.4129 12.0002L17.955 7.45808C18.3455 7.06756 18.3455 6.43439 17.955 6.04387C17.5645 5.65335 16.9313 5.65335 16.5408 6.04387L11.9987 10.586L7.45711 6.04439C7.06658 5.65386 6.43342 5.65386 6.04289 6.04439C5.65237 6.43491 5.65237 7.06808 6.04289 7.4586L10.5845 12.0002L6.04289 16.5418Z"></path>
                     </svg>
                 </button>
                 <div class="px-2 pr-14">
-                    <h4 class="mb-2 text-2xl font-semibold text-neutral-800 dark:text-white/90">
+                    <h4 class="mb-2 text-2xl font-semibold dark:text-white/90">
                         "Edit Account Information"
                     </h4>
                     <p class="mb-6 text-sm text-neutral-500 dark:text-neutral-400 lg:mb-7">
@@ -40,17 +40,17 @@ pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a
                 <form action="" method="post" class="flex flex-col">
                     <input type="hidden" name="csrf_token" value=(csrf_token) />
                     <div class="max-h-110 overflow-y-auto px-2">
-                        <h5 class="mb-5 text-lg font-medium text-neutral-800 dark:text-white/90 lg:mb-6">
+                        <h5 class="mb-5 text-lg font-medium dark:text-white/90 lg:mb-6">
                             "Account Information"
                         </h5>
 
                         <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                             <div class="col-span-2 lg:col-span-1">
-                                <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-400">
+                                <label class="mb-1.5 block text-sm font-medium dark:text-neutral-400">
                                     "First Name"
                                 </label>
                                 <input type="text" name="firstName" value=(admin.first_name)
-                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm text-neutral-800 shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
+                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-750 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
                                 @if let Some(errors) = &admin.errors.first_name {
                                     @if let Some(err) = errors.first() {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
@@ -59,11 +59,11 @@ pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a
                             </div>
 
                             <div class="col-span-2 lg:col-span-1">
-                                <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-400">
+                                <label class="mb-1.5 block text-sm font-medium dark:text-neutral-400">
                                     "Last Name"
                                 </label>
                                 <input type="text" name="lastName" value=(admin.last_name)
-                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm text-neutral-800 shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
+                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-750 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
                                 @if let Some(errors) = &admin.errors.last_name {
                                     @if let Some(err) = errors.first() {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
@@ -72,11 +72,11 @@ pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a
                             </div>
 
                             <div class="col-span-2 lg:col-span-1">
-                                <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-400">
+                                <label class="mb-1.5 block text-sm font-medium dark:text-neutral-400">
                                     "E-mail"
                                 </label>
                                 <input type="text" name="email" value=(admin.email)
-                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm text-neutral-800 shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
+                                    class="h-11 w-full rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-750 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
                                 @if let Some(errors) = &admin.errors.email {
                                     @if let Some(err) = errors.first() {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
@@ -85,12 +85,12 @@ pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a
                             </div>
 
                             <div class="col-span-2 lg:col-span-1">
-                                <label class="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-400">
+                                <label class="mb-1.5 block text-sm font-medium dark:text-neutral-400">
                                     "Phone"
                                 </label>
                                 <input "x-mask:dynamic"="'(99) 99999-9999'" type="number" name="phone" inputmode="numeric"
                                     value=(admin.phone) placeholder="(11) 98765-4321"
-                                    class="h-11 w-full appearance-none rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm text-neutral-800 shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
+                                    class="h-11 w-full appearance-none rounded-lg border border-neutral-300 bg-transparent bg-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-neutral-400 focus:border-indigo-300 focus:outline-hidden focus:ring-3 focus:ring-indigo-500/10 dark:border-neutral-750 dark:bg-neutral-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-indigo-800" />
                                 @if let Some(errors) = &admin.errors.phone {
                                     @if let Some(err) = errors.first() {
                                         <p class="mt-1 text-xs text-red-700">(err)</p>
@@ -101,7 +101,7 @@ pub fn admin_edit_account_modal<'a>(csrf_token: &'a str, admin: &'a AdminInfo<'a
                     </div>
                     <div class="flex items-center gap-3 px-2 mt-6 lg:justify-end">
                         <button x-on:click="isProfileInfoModal = false" type="button"
-                            class="flex w-full justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-white/[0.03] sm:w-auto">
+                            class="flex w-full justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium hover:bg-neutral-50 dark:border-neutral-750 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-white/[0.03] sm:w-auto">
                             "Cancel"
                         </button>
                         <button type="submit"

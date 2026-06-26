@@ -135,11 +135,11 @@ pub fn admin_add_customer_template(ctx: &Context<AddCustomerPayload, ()>) -> imp
 
     let form_field_ids: Vec<&str> = id_fields.iter().chain(address_fields.iter()).map(|f| f.id).collect();
     let form_field_ids_json = serde_json::to_string(&form_field_ids).unwrap_or("[]".to_string());
-    let field_classes = "h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 pr-10 text-sm text-neutral-800 shadow-xs placeholder:text-neutral-400 focus:ring-3 focus:outline-hidden";
+    let field_classes = "h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 pr-10 text-sm shadow-xs placeholder:text-neutral-400 focus:ring-3 focus:outline-hidden";
 
     rsx! {
     <div class="mx-auto max-w-3xl p-4 md:p-6">
-        <h2 class="mb-5 text-lg font-semibold text-neutral-800 lg:mb-7 dark:text-white/90">
+        <h2 class="mb-5 text-lg font-semibold lg:mb-7 dark:text-white/90">
             "Add New Customer"
         </h2>
 
@@ -158,9 +158,9 @@ pub fn admin_add_customer_template(ctx: &Context<AddCustomerPayload, ()>) -> imp
             <form id="add-new-customer-form" action="/admin/add-customer" method="POST" x-data=(format!("formFieldValidation({form_field_ids_json})"))>
                 <input type="hidden" name="csrf_token" value=(ctx.csrf_token.0) />
 
-                <div class="mb-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3">
+                <div class="mb-6 rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-white/3">
                     <div class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
-                        <h4 class="text-base font-semibold text-neutral-800 dark:text-white/90">
+                        <h4 class="text-base font-semibold dark:text-white/90">
                             "Identification"
                         </h4>
                     </div>
@@ -172,9 +172,9 @@ pub fn admin_add_customer_template(ctx: &Context<AddCustomerPayload, ()>) -> imp
                     </div>
                 </div>
 
-                <div class="mb-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3">
+                <div class="mb-6 rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-white/3">
                     <div class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
-                        <h4 class="text-base font-semibold text-neutral-800 dark:text-white/90">
+                        <h4 class="text-base font-semibold dark:text-white/90">
                             "Address"
                         </h4>
                     </div>
@@ -188,7 +188,7 @@ pub fn admin_add_customer_template(ctx: &Context<AddCustomerPayload, ()>) -> imp
 
                 <div class="flex justify-end gap-4">
                     <a href="/admin/customers"
-                        class="flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+                        class="flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-750 hover:bg-neutral-50">
                         "Cancel"
                     </a>
                     <button type="submit"

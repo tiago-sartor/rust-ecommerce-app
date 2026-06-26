@@ -1,10 +1,10 @@
 use crate::backend::{layouts::*, templates::*};
 use crate::middlewares::csrf::CsrfToken;
-use crate::models::{Address, Admin, Customer};
+use crate::models::{Address, Admin, Customer, CustomerSummary, Order, address};
 use crate::server::handlers::backend::AddCustomerPayload;
-use crate::utils::{AppError, BrazilianStates, Context};
+use crate::utils::{AppError, BrazilianStates, Context, helpers, password};
 use axum::{
-    extract::{Extension, Form, Query, State},
+    extract::{Extension, Form, Path, Query, State},
     response::{IntoResponse, Redirect},
 };
 use hypertext::Renderable;
@@ -14,13 +14,14 @@ use tower_sessions::Session;
 use validator::Validate;
 
 #[derive(Default)]
-pub struct Data {
-    pub customers: Vec<Customer>,
+pub struct CustomersData {
+    pub customers: Vec<CustomerSummary>,
     pub count: i64,
     pub page: i64,
     pub limit: i64,
-    pub total_orders: i64,
-    pub total_ltv: f64,
+}
+pub struct CustomerDetailsData {
+    pub orders: Vec<Order>,
 }
 
 pub async fn admin_customers(
@@ -33,12 +34,12 @@ pub async fn admin_customers(
     ctx.admin = Some(admin);
     ctx.csrf_token = csrf_token;
 
-    let page: i64 = params.get("page").and_then(|v| v.parse().ok().filter(|&v| v > 0)).unwrap_or(1);
-    let limit: i64 = params.get("limit").and_then(|v| v.parse().ok().filter(|&v| v > 9)).unwrap_or(10);
+    let page: i64 = params.get("page").and_then(|v| v.parse().ok()).map(|v: i64| v.clamp(1, 10_000)).unwrap_or(1);
+    let limit: i64 = params.get("limit").and_then(|v| v.parse().ok()).map(|v: i64| v.clamp(10, 100)).unwrap_or(10);
 
-    let (customers, count) = Customer::get_paginated(page, limit, "", &pool).await.unwrap_or_default();
+    let (customers, count) = Customer::get_paginated(page, limit, "", &pool).await?;
 
-    ctx.data = Data { customers, count, page, limit, total_orders: 0, total_ltv: 0.0 };
+    ctx.data = CustomersData { customers, count, page, limit };
 
     let template = admin_customers_template(&ctx);
     let page_scripts = vec!["admin-checkbox-selector", "admin-action-dropdown"];
@@ -69,7 +70,7 @@ pub async fn admin_add_customer_get(
 
 pub async fn admin_add_customer_post(
     Extension(admin): Extension<Admin>,
-    Extension(token): Extension<CsrfToken>,
+    Extension(csrf_token): Extension<CsrfToken>,
     session: Session,
     State(pool): State<PgPool>,
     Form(payload): Form<AddCustomerPayload>,
@@ -77,7 +78,7 @@ pub async fn admin_add_customer_post(
     let mut ctx = Context::<AddCustomerPayload, ()>::new();
     ctx.admin = Some(admin);
     ctx.payload = Form(payload);
-    ctx.csrf_token = token;
+    ctx.csrf_token = csrf_token;
 
     if let Err(e) = ctx.payload.validate() {
         for (field, errs) in e.field_errors() {
@@ -98,6 +99,7 @@ pub async fn admin_add_customer_post(
             first_name: ctx.payload.first_name.clone(),
             last_name: ctx.payload.last_name.clone(),
             email: ctx.payload.email.clone(),
+            password_hash: password::hash_password(&helpers::generate_random_token(32))?,
             phone: ctx.payload.phone.clone(),
             cpf: cpf,
             cnpj: cnpj,
@@ -173,6 +175,35 @@ pub async fn admin_add_customer_post(
 
     let template = admin_add_customer_template(&ctx);
     let html = admin_layout("Add Customer", template, &ctx, None);
+
+    Ok(html.render().into_response())
+}
+
+pub async fn admin_customer_details(
+    Path(id): Path<i64>,
+    Extension(admin): Extension<Admin>,
+    Extension(csrf_token): Extension<CsrfToken>,
+    State(pool): State<PgPool>,
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<impl IntoResponse, AppError> {
+    let mut ctx = Context::new();
+    ctx.admin = Some(admin);
+    ctx.csrf_token = csrf_token;
+
+    let customer = Customer::get_by_id(&id, &pool).await?;
+    ctx.customer = customer;
+
+    let address = Address::get_by_customer_id(&id, &pool).await?;
+    ctx.address = address;
+
+    let page: i64 = params.get("page").and_then(|v| v.parse().ok()).map(|v: i64| v.clamp(1, 10_000)).unwrap_or(1);
+    let limit: i64 = params.get("limit").and_then(|v| v.parse().ok()).map(|v: i64| v.clamp(10, 100)).unwrap_or(10);
+
+    let order_history = Order::get_paginated_by_customer_id(&ctx.customer.as_ref().unwrap().id, &page, &limit, "", &pool).await?;
+    ctx.data = order_history;
+
+    let template = admin_customer_details_template(&ctx);
+    let html = admin_layout("Customer Details", template, &ctx, None);
 
     Ok(html.render().into_response())
 }

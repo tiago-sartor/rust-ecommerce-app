@@ -59,20 +59,20 @@ impl FormField {
                         x-bind:checked=(format!("{} === '{}'", self.id, self.null_placeholder))
                         id=(format!("nullable_{}", self.id))
                         type="checkbox"
-                        class="size-3 cursor-pointer appearance-none rounded-[3px] border border-gray-500 bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                        class="size-3 cursor-pointer appearance-none rounded-[3px] border border-neutral-500 bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-indigo-600 disabled:border-neutral-300 disabled:bg-neutral-100 disabled:checked:bg-neutral-100 forced-colors:appearance-auto"
                     />
-                    <svg viewBox="0 0 14 14" fill="none" class="pointer-events-none absolute size-2.5 self-center justify-self-center stroke-white group-has-disabled:stroke-gray-950/25">
+                    <svg viewBox="0 0 14 14" fill="none" class="pointer-events-none absolute size-2.5 self-center justify-self-center stroke-white group-has-disabled:stroke-neutral-950/25">
                         <path d="M3 8L6 11L11 3.5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-0 group-has-checked:opacity-100"></path>
                     </svg>
                 </div>
-                <label for=(format!("nullable_{}", self.id)) class="text-xs cursor-pointer text-neutral-700">(self.null_label)</label>
+                <label for=(format!("nullable_{}", self.id)) class="text-xs cursor-pointer text-neutral-750">(self.null_label)</label>
             </div>
         });
 
         rsx! {
             <div>
                 <div class="mb-1.5 flex items-center justify-between">
-                    <label for=(self.id) class="block text-sm font-medium text-neutral-700">
+                    <label for=(self.id) class="block text-sm font-medium text-neutral-750">
                         (self.label) @if self.required { <span class="text-red-600">" *"</span> }
                     </label>
                     @if self.nullable && self.input_type != "select" { (nullable_checkbox) }
@@ -102,7 +102,7 @@ impl FormField {
                         </svg>
                     } @else {
                         <input
-                            "x-model.fill.debounce.900ms"=(self.id)
+                            "x-model.fill"=(self.id)
                             "x-mask:dynamic"=(self.mask)
                             "x-bind:readonly"=((self.nullable && self.input_type != "select").then(|| format!("{} === '{}'", self.id, self.null_placeholder)))
                             x-effect=(format!("{}; $dispatch('run_validation')", self.id))

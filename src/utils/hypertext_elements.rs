@@ -4,17 +4,21 @@ pub use hypertext::validation::hypertext_elements::*;
 // Define missing elements for type-checking in rsx!
 hypertext::define_elements! {
     svg {
-        width
-        height
         fill
-        viewBox
+        height
         stroke
         stroke_width
+        viewBox
+        width
     }
     path {
+        clip_rule
         d
-        stroke_width
+        fill
+        fill_rule
+        stroke
         stroke_linecap
         stroke_linejoin
+        stroke_width
     }
 }

@@ -18,6 +18,8 @@
   --color-gold-800: hsl(40, 35%, 40%);
   --color-gold-900: hsl(40, 35%, 32.5%);
 
+  --color-neutral-750: #333333;
+
   /* Create a new custom breakpoint of 90rem (1440px) */
   --breakpoint-1440px: 90rem;
   --container-1440px: 90rem;
@@ -27,7 +29,7 @@
 
   html,
   body {
-    @apply text-base font-normal text-gray-800 bg-gray-50;
+    @apply bg-neutral-50 text-base font-normal text-neutral-750;
   }
 
   button:not(:disabled),
@@ -73,7 +75,7 @@
   }
 
   .menu-item-inactive {
-    @apply text-gray-700 hover:bg-gray-100;
+    @apply text-neutral-750 hover:bg-neutral-100;
   }
 
 
@@ -83,7 +85,7 @@
   }
 
   .menu-item-icon-inactive {
-    @apply text-gray-500 group-hover:text-gray-700;
+    @apply text-neutral-500 group-hover:text-neutral-750;
   }
 
 
@@ -97,7 +99,7 @@
   }
 
   .menu-item-arrow-inactive {
-    @apply stroke-gray-500 group-hover:text-gray-700;
+    @apply stroke-neutral-500 group-hover:text-neutral-750;
   }
 
 
@@ -114,6 +116,6 @@
   }
 
   .menu-dropdown-item-inactive {
-    @apply text-gray-700 hover:bg-gray-100;
+    @apply text-neutral-750 hover:bg-neutral-100;
   }
 }

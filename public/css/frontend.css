@@ -9,7 +9,6 @@
     --font-serif: "Cormorant Garamond", serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
-    --color-gray-800: oklch(27.8% 0.033 256.848);
     --color-neutral-50: oklch(98.5% 0 0);
     --color-neutral-100: oklch(97% 0 0);
     --color-neutral-200: oklch(92.2% 0 0);
@@ -17,8 +16,6 @@
     --color-neutral-400: oklch(70.8% 0 0);
     --color-neutral-500: oklch(55.6% 0 0);
     --color-neutral-600: oklch(43.9% 0 0);
-    --color-neutral-700: oklch(37.1% 0 0);
-    --color-neutral-800: oklch(26.9% 0 0);
     --color-stone-900: oklch(21.6% 0.006 56.043);
     --color-black: #000;
     --color-white: #fff;
@@ -42,6 +39,7 @@
     --text-8xl: 6rem;
     --text-8xl--line-height: 1;
     --font-weight-light: 300;
+    --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
@@ -56,6 +54,7 @@
     --default-mono-font-family: var(--font-mono);
     --color-gold-500: hsl(40, 35%, 70%);
     --color-gold-600: hsl(40, 35%, 60%);
+    --color-neutral-750: #333333;
     --container-1440px: 90rem;
   }
 }
@@ -607,11 +606,8 @@
   .text-neutral-600 {
     color: var(--color-neutral-600);
   }
-  .text-neutral-700 {
-    color: var(--color-neutral-700);
-  }
-  .text-neutral-800 {
-    color: var(--color-neutral-800);
+  .text-neutral-750 {
+    color: var(--color-neutral-750);
   }
   .text-white {
     color: var(--color-white);
@@ -713,10 +709,10 @@
       }
     }
   }
-  .hover\:text-neutral-800 {
+  .hover\:text-neutral-750 {
     &:hover {
       @media (hover: hover) {
-        color: var(--color-neutral-800);
+        color: var(--color-neutral-750);
       }
     }
   }
@@ -925,7 +921,9 @@
   html {
     font-size: var(--text-base);
     line-height: var(--tw-leading, var(--text-base--line-height));
-    color: var(--color-gray-800);
+    --tw-font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-neutral-750);
   }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;

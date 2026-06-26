@@ -25,12 +25,7 @@ impl IntoResponse for AppError {
         // Log the error for debugging purposes
         tracing::error!(error = %self);
 
-        match self {
-            AppError::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "A database error occurred.").into_response(),
-            AppError::Session(_) => (StatusCode::INTERNAL_SERVER_ERROR, "A session error occurred.").into_response(),
-            AppError::IO(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An internal I/O error occurred.").into_response(),
-            AppError::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An internal server error occurred.").into_response(),
-        }
+        (StatusCode::INTERNAL_SERVER_ERROR, "An internal server error occurred. Please try again later.").into_response()
     }
 }
 

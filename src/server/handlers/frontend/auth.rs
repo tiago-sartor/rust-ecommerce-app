@@ -7,10 +7,13 @@ use axum::{
 use serde::Deserialize;
 use sqlx::PgPool;
 use tower_sessions::Session;
+use validator::Validate;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Validate)]
 pub struct LoginPayload {
+    #[validate(email(message = "Invalid email address"), length(max = 254))]
     pub email: String,
+    #[validate(length(min = 1, max = 128))]
     pub password: String,
 }
 
@@ -27,6 +30,8 @@ pub async fn customer_login_post(
         Some(customer) if crate::utils::password::verify_password(&customer.password_hash, &payload.password) => {
             session.insert("customer_id", customer.id).await?;
             session.insert("csrf_token", helpers::generate_random_token(64)).await?;
+
+            helpers::regenerate_session(&session).await?;
 
             Ok(Redirect::to("/").into_response())
         }

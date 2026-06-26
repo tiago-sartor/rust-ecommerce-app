@@ -12,7 +12,7 @@ pub struct Admin {
     pub profile_image_url: Option<String>,
     pub role: AdminRole,
     pub is_active: bool,
-    pub last_login: Option<OffsetDateTime>,
+    pub last_active_at: Option<OffsetDateTime>,
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
     pub reset_token: Option<String>,
@@ -41,7 +41,7 @@ impl Default for Admin {
             profile_image_url: None,
             role: AdminRole::default(),
             is_active: false,
-            last_login: None,
+            last_active_at: None,
             created_at: OffsetDateTime::UNIX_EPOCH,
             updated_at: OffsetDateTime::UNIX_EPOCH,
             reset_token: None,
@@ -69,7 +69,7 @@ impl Admin {
                    profile_image_url,
                    role as "role!: AdminRole",
                    is_active,
-                   last_login as "last_login?: OffsetDateTime",
+                   last_active_at as "last_active_at?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",
                    reset_token,
@@ -96,7 +96,7 @@ impl Admin {
                    profile_image_url,
                    role as "role!: AdminRole",
                    is_active,
-                   last_login as "last_login?: OffsetDateTime",
+                   last_active_at as "last_active_at?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",
                    reset_token,
@@ -110,7 +110,7 @@ impl Admin {
         .await
     }
 
-    pub async fn get_by_reset_token(reset_token: &str, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn get_by_reset_token(hashed_reset_token: &str, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as!(
             Self,
             r#"
@@ -123,7 +123,7 @@ impl Admin {
                    profile_image_url,
                    role as "role!: AdminRole",
                    is_active,
-                   last_login as "last_login?: OffsetDateTime",
+                   last_active_at as "last_active_at?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",
                    reset_token,
@@ -131,25 +131,26 @@ impl Admin {
             FROM admins
             WHERE reset_token = $1
             "#,
-            reset_token
+            hashed_reset_token
         )
         .fetch_optional(pool)
         .await
     }
 
-    pub async fn update_reset_token(reset_token: &str, email: &str, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
-        sqlx::query!(
+    pub async fn update_reset_token(hashed_reset_token: &str, email: &str, pool: &sqlx::PgPool) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
             r#"
             UPDATE admins
             SET reset_token = $1, reset_expires_at = NOW() + INTERVAL '1 hour'
             WHERE email = $2
             "#,
-            reset_token,
+            hashed_reset_token,
             email
         )
         .execute(pool)
         .await?;
-        Ok(())
+
+        Ok(result.rows_affected() > 0)
     }
 
     pub async fn clear_reset_token(id: &i64, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
@@ -166,8 +167,8 @@ impl Admin {
         Ok(())
     }
 
-    pub async fn update_password(id: &i64, password_hash: &str, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
-        sqlx::query!(
+    pub async fn update_password(id: &i64, password_hash: &str, pool: &sqlx::PgPool) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query!(
             r#"
             UPDATE admins
             SET password_hash = $1, updated_at = NOW()
@@ -178,7 +179,7 @@ impl Admin {
         )
         .execute(pool)
         .await?;
-        Ok(())
+        Ok(result.rows_affected() > 0)
     }
 
     pub async fn get_all_system_users(pool: &sqlx::PgPool) -> Result<Vec<Self>, sqlx::Error> {
@@ -194,7 +195,7 @@ impl Admin {
                    profile_image_url,
                    role as "role!: AdminRole",
                    is_active,
-                   last_login as "last_login?: OffsetDateTime",
+                   last_active_at as "last_active_at?: OffsetDateTime",
                    created_at as "created_at!: OffsetDateTime",
                    updated_at as "updated_at!: OffsetDateTime",
                    reset_token,
